@@ -1,0 +1,20 @@
+build docker stable:
+    stage: build
+    image: docker:stable
+    before_script:
+        - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+        - mkdir -p ~/.docker/cli-plugins/
+        - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.8.2/buildx-v0.8.2.linux-amd64
+        - chmod a+x ~/.docker/cli-plugins/docker-buildx
+        - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        - docker buildx create --use --config files/docker/buildkitd.toml
+    script:
+        - |
+            docker buildx build \
+            --push \
+            --platform linux/arm64/v8,linux/amd64 \
+            --cache-from ${CI_REGISTRY_IMAGE}/docker:cache \
+            --cache-to ${CI_REGISTRY_IMAGE}/docker:cache \
+            -t ${CI_REGISTRY_IMAGE}/docker:stable \
+            ${PROJECT_DIR}
+

@@ -1,0 +1,14 @@
+# cjpeg
+RUN curl -fsSLO "https://github.com/imagemin/mozjpeg-bin/raw/main/vendor/linux/cjpeg" \
+ && chmod 0755 cjpeg \
+ && mv cjpeg /usr/local/bin/cjpeg
+
+# Zopfli
+RUN curl -fsSLO "https://github.com/imagemin/zopflipng-bin/raw/main/vendor/linux/zopflipng" \
+ && chmod 0755 zopflipng \
+ && mv zopflipng /usr/local/bin/zopflipng
+
+# pngout
+RUN curl -fsSLO "https://github.com/imagemin/pngout-bin/raw/main/vendor/linux/x64/pngout" \
+ && chmod 0755 pngout \
+ && mv pngout /usr/local/bin/pngout

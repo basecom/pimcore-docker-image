@@ -2,51 +2,53 @@ default:
     tags:
         - 'bsc-eks-x86'
     interruptible: true
-    image:
-        name: gcr.io/kaniko-project/executor:debug
-        entrypoint: ['']
-
-#services:
-#    - name: docker:20-dind
-#      entrypoint: ['env', '-u', 'DOCKER_HOST']
-#      command: ['dockerd-entrypoint.sh', '--experimental']
-
-#variables:
-#    DOCKER_HOST: tcp://docker:2375
-#    DOCKER_DRIVER: overlay2
-#    DOCKER_CLI_EXPERIMENTAL: enabled
 
 stages:
     - build
     - publish
     - clean
 
-before_script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_JOB_TOKEN}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-#    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+
+.docker buildx:
+    image: docker:stable
+    services:
+        -   name: docker:20-dind
+            entrypoint: ['env', '-u', 'DOCKER_HOST']
+            command: ['dockerd-entrypoint.sh', '--experimental']
+    variables:
+        DOCKER_HOST: tcp://docker:2375
+        DOCKER_DRIVER: overlay2
+        DOCKER_CLI_EXPERIMENTAL: enabled
+    before_script:
+        - docker login -u ${CI_REGISTRY_USER} -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+        - mkdir -p ~/.docker/cli-plugins/
+        - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.8.2/buildx-v0.8.2.linux-amd64
+        - chmod a+x ~/.docker/cli-plugins/docker-buildx
+        - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        - docker buildx create --use --config files/docker/buildkitd.toml
+
+.kubernetes kaniko:
+    image:
+        name: gcr.io/kaniko-project/executor:debug
+        entrypoint: ['']
+    before_script:
+        - mkdir -p /kaniko/.docker
+        - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_JOB_TOKEN}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+
 
 .build image:
     stage: build
+    extends: .kubernetes kaniko
     script:
         - |
             /kaniko/executor \
                 --context "${CI_PROJECT_DIR}" \
                 --dockerfile "${CI_PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile" \
                 --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH}"
-#        - docker buildx create --platform "${PLATFORM}" --use
-#        - |
-#            docker buildx build \
-#                --push \
-#                --platform ${PLATFORM} \
-#                --cache-from type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-cache-${ARCH} \
-#                --cache-to type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-cache-${ARCH} \
-#                -f ${PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile \
-#                -t ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH} \
-#                ${PROJECT_DIR}
 
 .publish image:
     stage: publish
+    extends: .docker buildx
     script:
         - |
             docker manifest create ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG} \

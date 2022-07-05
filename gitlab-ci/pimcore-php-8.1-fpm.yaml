@@ -9,8 +9,8 @@ build pimcore php-8.1-fpm amd:
         SYSTEM: pimcore
         PLATFORM: linux/amd64
         ARCH: amd
-    needs:
-        - build docker stable
+#    needs:
+#        - build docker stable
 
 build pimcore php-8.1-fpm arm:
     extends: .build image
@@ -24,8 +24,8 @@ build pimcore php-8.1-fpm arm:
         SYSTEM: pimcore
         PLATFORM: linux/arm64/v8
         ARCH: arm
-    needs:
-        - build docker stable
+#    needs:
+#        - build docker stable
 
 publish pimcore php-8.1-fpm:
     extends: .publish image

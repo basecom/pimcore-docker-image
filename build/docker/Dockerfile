@@ -20,7 +20,7 @@ COPY --from=docker/buildx-bin:master /buildx /usr/libexec/docker/cli-plugins/doc
 # Use buildkitd.toml as default for buildx commands
 # See https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#-specify-a-configuration-file-for-the-buildkitd-daemon---config
 ENV BUILDX_CONFIG=/etc/buildkit
-ADD buildkitd.toml $BUILDX_CONFIG/buildkitd.default.toml
+ADD files/docker/buildkitd.toml $BUILDX_CONFIG/buildkitd.default.toml
 
 RUN docker buildx version
 RUN docker compose version

@@ -1,37 +1,37 @@
 # pimcore php 8.1 fpm
-build pimcore php-8.1-fpm amd:
-    extends: .build image
-    variables:
-        IMAGE_NAME: php
-        IMAGE_TAG: 8.1-fpm-pimcore
-        PHP_VERSION: '8.1'
-        IMAGE_VARIANT: fpm
-        SYSTEM: pimcore
-        PLATFORM: linux/amd64
-        ARCH: amd
-#    needs:
-#        - build docker stable
-
-build pimcore php-8.1-fpm arm:
-    extends: .build image
-    tags:
-         - 'bsc-eks-arm64' #TODO: Move to create logic
-    variables:
-        IMAGE_NAME: php
-        IMAGE_TAG: 8.1-fpm-pimcore
-        PHP_VERSION: '8.1'
-        IMAGE_VARIANT: fpm
-        SYSTEM: pimcore
-        PLATFORM: linux/arm64/v8
-        ARCH: arm
-#    needs:
-#        - build docker stable
+#build pimcore php-8.1-fpm amd:
+#    extends: .build image
+#    variables:
+#        IMAGE_NAME: php
+#        IMAGE_TAG: 8.1-fpm-pimcore
+#        PHP_VERSION: '8.1'
+#        IMAGE_VARIANT: fpm
+#        SYSTEM: pimcore
+#        PLATFORM: linux/amd64
+#        ARCH: amd
+##    needs:
+##        - build docker stable
+#
+#build pimcore php-8.1-fpm arm:
+#    extends: .build image
+#    tags:
+#         - 'bsc-eks-arm64' #TODO: Move to create logic
+#    variables:
+#        IMAGE_NAME: php
+#        IMAGE_TAG: 8.1-fpm-pimcore
+#        PHP_VERSION: '8.1'
+#        IMAGE_VARIANT: fpm
+#        SYSTEM: pimcore
+#        PLATFORM: linux/arm64/v8
+#        ARCH: arm
+##    needs:
+##        - build docker stable
 
 publish pimcore php-8.1-fpm:
     extends: .publish image
     variables:
         IMAGE_NAME: php
         IMAGE_TAG: 8.1-fpm-pimcore
-    needs:
-        - build pimcore php-8.1-fpm amd
-        - build pimcore php-8.1-fpm arm
+#    needs:
+#        - build pimcore php-8.1-fpm amd
+#        - build pimcore php-8.1-fpm arm

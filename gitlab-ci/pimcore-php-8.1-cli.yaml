@@ -1,37 +1,37 @@
 # pimcore php 8.1 cli
-build pimcore php-8.1-cli amd:
-    extends: .build image
-    variables:
-        IMAGE_NAME: php
-        IMAGE_TAG: 8.1-cli-pimcore
-        PHP_VERSION: '8.1'
-        IMAGE_VARIANT: cli
-        SYSTEM: pimcore
-        PLATFORM: linux/amd64
-        ARCH: amd
-#    needs:
-#        - build docker stable
-
-build pimcore php-8.1-cli arm:
-    extends: .build image
-    tags:
-         - 'bsc-eks-arm64' #TODO: Move to create logic
-    variables:
-        IMAGE_NAME: php
-        IMAGE_TAG: 8.1-cli-pimcore
-        PHP_VERSION: '8.1'
-        IMAGE_VARIANT: cli
-        SYSTEM: pimcore
-        PLATFORM: linux/arm64/v8
-        ARCH: arm
-#    needs:
-#        - build docker stable
+#build pimcore php-8.1-cli amd:
+#    extends: .build image
+#    variables:
+#        IMAGE_NAME: php
+#        IMAGE_TAG: 8.1-cli-pimcore
+#        PHP_VERSION: '8.1'
+#        IMAGE_VARIANT: cli
+#        SYSTEM: pimcore
+#        PLATFORM: linux/amd64
+#        ARCH: amd
+##    needs:
+##        - build docker stable
+#
+#build pimcore php-8.1-cli arm:
+#    extends: .build image
+#    tags:
+#         - 'bsc-eks-arm64' #TODO: Move to create logic
+#    variables:
+#        IMAGE_NAME: php
+#        IMAGE_TAG: 8.1-cli-pimcore
+#        PHP_VERSION: '8.1'
+#        IMAGE_VARIANT: cli
+#        SYSTEM: pimcore
+#        PLATFORM: linux/arm64/v8
+#        ARCH: arm
+##    needs:
+##        - build docker stable
 
 publish pimcore php-8.1-cli:
     extends: .publish image
     variables:
         IMAGE_NAME: php
         IMAGE_TAG: 8.1-cli-pimcore
-    needs:
-        - build pimcore php-8.1-cli amd
-        - build pimcore php-8.1-cli arm
+#    needs:
+#        - build pimcore php-8.1-cli amd
+#        - build pimcore php-8.1-cli arm

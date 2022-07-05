@@ -80,7 +80,7 @@ build $system php-$version-$variant amd:
 build $system php-$version-$variant arm:
     extends: .build image
     tags:
-         - 'bsc-aws-arm'
+         - 'bsc-eks-arm64'
     variables:
         IMAGE_NAME: php
         IMAGE_TAG: $version-$variant-$system

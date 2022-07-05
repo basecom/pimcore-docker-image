@@ -15,7 +15,7 @@ build pimcore php-8.1-cli amd:
 build pimcore php-8.1-cli arm:
     extends: .build image kaniko
     tags:
-         - 'bsc-eks-arm64' #TODO: Move to create logic
+         - 'bsc-eks-arm64'
     variables:
         IMAGE_NAME: php
         IMAGE_TAG: 8.1-cli-pimcore

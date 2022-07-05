@@ -42,7 +42,6 @@ stages:
         - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
 
 
-#TODO: Implement caching for kaniko: https://github.com/GoogleContainerTools/kaniko#caching
 .build image kaniko:
     stage: build
     extends: .kubernetes kaniko

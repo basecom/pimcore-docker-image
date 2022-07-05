@@ -1,5 +1,5 @@
 include:
-#    - local: /gitlab-ci/docker-stable.yaml
+    - local: /gitlab-ci/docker-stable.yaml
     - local: /gitlab-ci/pimcore-php-8.1-cli.yaml
     - local: /gitlab-ci/pimcore-php-8.1-fpm.yaml
 

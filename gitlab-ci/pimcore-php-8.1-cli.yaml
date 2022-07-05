@@ -9,8 +9,6 @@ build pimcore php-8.1-cli amd:
         SYSTEM: pimcore
         PLATFORM: linux/amd64,linux/arm64/v8
         ARCH: amd
-#    needs:
-#        - build docker stable
 
 build pimcore php-8.1-cli arm:
     extends: .build image kaniko
@@ -24,8 +22,6 @@ build pimcore php-8.1-cli arm:
         SYSTEM: pimcore
         PLATFORM: linux/arm64/v8
         ARCH: arm
-#    needs:
-#        - build docker stable
 
 publish pimcore php-8.1-cli:
     extends: .publish image

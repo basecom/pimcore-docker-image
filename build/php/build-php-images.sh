@@ -74,8 +74,6 @@ build $system php-$version-$variant amd:
         SYSTEM: $system
         PLATFORM: linux/amd64
         ARCH: amd
-    needs:
-        - build docker stable
 
 build $system php-$version-$variant arm:
     extends: .build image
@@ -89,8 +87,6 @@ build $system php-$version-$variant arm:
         SYSTEM: $system
         PLATFORM: linux/arm64/v8
         ARCH: arm
-    needs:
-        - build docker stable
 
 publish $system php-$version-$variant:
     extends: .publish image

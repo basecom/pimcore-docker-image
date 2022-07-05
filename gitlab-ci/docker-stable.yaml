@@ -9,5 +9,5 @@ build docker stable:
             --cache-from ${CI_REGISTRY_IMAGE}/docker:cache \
             --cache-to ${CI_REGISTRY_IMAGE}/docker:cache \
             -t ${CI_REGISTRY_IMAGE}/docker:stable \
-            ${PROJECT_DIR}
+            ${CI_PROJECT_DIR}
 

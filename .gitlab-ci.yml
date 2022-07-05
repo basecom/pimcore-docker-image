@@ -24,7 +24,7 @@ stages:
         - mkdir -p ~/.docker/cli-plugins/
         - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.8.2/buildx-v0.8.2.linux-amd64
         - chmod a+x ~/.docker/cli-plugins/docker-buildx
-        - docker buildx create --driver kubernetes --use --config files/docker/buildkitd.toml
+        - docker buildx create --driver kubernetes --platform "linux/amd64,linux/arm64/v8" --use --config files/docker/buildkitd.toml
 
 .kubernetes kaniko:
     image:
@@ -36,7 +36,7 @@ stages:
 
 
 #TODO: Implement caching for kaniko: https://github.com/GoogleContainerTools/kaniko#caching
-.build image:
+.build image kaniko:
     stage: build
     extends: .kubernetes kaniko
     script:
@@ -45,6 +45,20 @@ stages:
                 --context "${CI_PROJECT_DIR}" \
                 --dockerfile "${CI_PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile" \
                 --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH}"
+
+.build image buildx:
+    stage: build
+    extends: .docker buildx
+    script:
+        - |
+            docker buildx build \
+                --push \
+                --platform "linux/amd64,linux/arm64/v8" \
+                --cache-from type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-cache \
+                --cache-to type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-cache \
+                -f ${PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile \
+                -t ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG} \
+                ${CI_PROJECT_DIR}
 
 .publish image:
     stage: publish

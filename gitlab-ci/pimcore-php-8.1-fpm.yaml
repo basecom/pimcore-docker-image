@@ -27,11 +27,21 @@
 ##    needs:
 ##        - build docker stable
 
-publish pimcore php-8.1-fpm:
-    extends: .publish image
-    variables:
-        IMAGE_NAME: php
-        IMAGE_TAG: 8.1-fpm-pimcore
+#publish pimcore php-8.1-fpm:
+#    extends: .publish image
+#    variables:
+#        IMAGE_NAME: php
+#        IMAGE_TAG: 8.1-fpm-pimcore
 #    needs:
 #        - build pimcore php-8.1-fpm amd
 #        - build pimcore php-8.1-fpm arm
+
+
+build pimcore php-8.1-fpm:
+    extends: .build image buildx
+    variables:
+        IMAGE_NAME: php
+        IMAGE_TAG: 8.1-fpm-pimcore
+        PHP_VERSION: '8.1'
+        IMAGE_VARIANT: fpm
+        SYSTEM: pimcore

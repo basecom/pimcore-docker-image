@@ -1,6 +1,6 @@
 # pimcore php 8.1 fpm
 build pimcore php-8.1-fpm amd:
-    extends: .build image
+    extends: .build image kaniko
     variables:
         IMAGE_NAME: php
         IMAGE_TAG: 8.1-fpm-pimcore
@@ -13,7 +13,7 @@ build pimcore php-8.1-fpm amd:
 #        - build docker stable
 
 build pimcore php-8.1-fpm arm:
-    extends: .build image
+    extends: .build image kaniko
     tags:
          - 'bsc-eks-arm64' #TODO: Move to create logic
     variables:

@@ -12,7 +12,7 @@ stages:
 .docker buildx:
     image: docker:stable
     services:
-        -   name: docker:22-dind
+        -   name: docker:20-dind
             entrypoint: ['env', '-u', 'DOCKER_HOST']
             command: ['dockerd-entrypoint.sh', '--experimental']
     variables:

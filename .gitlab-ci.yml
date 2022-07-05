@@ -12,7 +12,7 @@ stages:
 .docker buildx:
     image: docker:stable
     services:
-        -   name: docker:20-dind
+        -   name: docker:22
             entrypoint: ['env', '-u', 'DOCKER_HOST']
             command: ['dockerd-entrypoint.sh', '--experimental']
     variables:
@@ -20,12 +20,11 @@ stages:
         DOCKER_DRIVER: overlay2
         DOCKER_CLI_EXPERIMENTAL: enabled
     before_script:
-        - docker login -u ${CI_REGISTRY_USER} -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+        - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
         - mkdir -p ~/.docker/cli-plugins/
         - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.8.2/buildx-v0.8.2.linux-amd64
         - chmod a+x ~/.docker/cli-plugins/docker-buildx
-        - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-        - docker buildx create --use --config files/docker/buildkitd.toml
+        - docker buildx create --driver kubernetes --use --config files/docker/buildkitd.toml
 
 .kubernetes kaniko:
     image:
@@ -36,6 +35,7 @@ stages:
         - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_JOB_TOKEN}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
 
 
+#TODO: Implement caching for kaniko: https://github.com/GoogleContainerTools/kaniko#caching
 .build image:
     stage: build
     extends: .kubernetes kaniko

@@ -30,9 +30,9 @@ before_script:
     stage: build
     script:
         - |
-            /kaniko/executor
-                --context "${CI_PROJECT_DIR}"
-                --dockerfile "${CI_PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile"
+            /kaniko/executor \
+                --context "${CI_PROJECT_DIR}" \
+                --dockerfile "${CI_PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile" \
                 --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH}"
 #        - docker buildx create --platform "${PLATFORM}" --use
 #        - |

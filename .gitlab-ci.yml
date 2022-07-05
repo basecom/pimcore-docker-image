@@ -39,7 +39,7 @@ stages:
         entrypoint: ['']
     before_script:
         - mkdir -p /kaniko/.docker
-        - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_JOB_TOKEN}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+        - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
 
 
 #TODO: Implement caching for kaniko: https://github.com/GoogleContainerTools/kaniko#caching
@@ -52,7 +52,7 @@ stages:
                 --context "${CI_PROJECT_DIR}" \
                 --dockerfile "${CI_PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile" \
                 --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH}"  \
-                --cache true
+                --cache "true"
 
 .build image buildx:
     stage: build

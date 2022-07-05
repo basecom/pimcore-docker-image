@@ -12,7 +12,7 @@ stages:
 .docker buildx:
     image: docker:stable
     services:
-        -   name: docker:20-dind
+        -   name: docker:dind
             entrypoint: ['env', '-u', 'DOCKER_HOST']
             command: ['dockerd-entrypoint.sh', '--experimental']
     variables:
@@ -32,7 +32,6 @@ stages:
             --platform "linux/amd64,linux/arm64/v8" \
             --config files/docker/buildkitd.toml \
             --use
-        - docker buildx inspect --bootstrap || true
 
 .kubernetes kaniko:
     image:

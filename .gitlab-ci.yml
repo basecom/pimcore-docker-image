@@ -24,14 +24,6 @@ stages:
         - mkdir -p ~/.docker/cli-plugins/
         - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.8.2/buildx-v0.8.2.linux-amd64
         - chmod a+x ~/.docker/cli-plugins/docker-buildx
-        - |
-            KUBECONFIG=/dev/null docker buildx create \
-            --driver kubernetes \
-            --driver-opt rootless=true \
-            --driver-opt namespace=gitlab-runner-x86 \
-            --platform "linux/amd64,linux/arm64/v8" \
-            --config files/docker/buildkitd.toml \
-            --use
 
 .kubernetes kaniko:
     image:
@@ -57,6 +49,14 @@ stages:
     stage: build
     extends: .docker buildx
     script:
+        - |
+            KUBECONFIG=/dev/null docker buildx create \
+            --driver kubernetes \
+            --driver-opt rootless=true \
+            --driver-opt namespace=gitlab-runner-x86 \
+            --platform "linux/amd64,linux/arm64/v8" \
+            --config files/docker/buildkitd.toml \
+            --use
         - |
             docker buildx build \
                 --push \

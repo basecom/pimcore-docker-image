@@ -41,6 +41,7 @@ RUN apt-get update \
     libjpeg62-turbo-dev \
     libkrb5-dev \
     liblcms2-dev \
+    libldap2-dev \
     liblqr-1-0-dev \
     libltdl-dev \
     liblzma-dev \
@@ -93,7 +94,7 @@ RUN apt-get update \
     build-essential \
     g++ \
  && docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp \
- && docker-php-ext-install intl mbstring mysqli bcmath gd bz2 soap xsl pdo pdo_mysql fileinfo exif zip opcache \
+ && docker-php-ext-install intl mbstring mysqli bcmath gd bz2 soap xsl pdo pdo_mysql fileinfo exif zip opcache ldap \
  && pecl install redis apcu xdebug imagick pcov amqp \
  && docker-php-ext-enable redis imagick apcu xdebug pcov amqp \
  && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \

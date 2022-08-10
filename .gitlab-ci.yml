@@ -48,6 +48,7 @@ stages:
 .build image buildx:
     stage: build
 #    extends: .docker buildx
+    image: docker:stable
     script:
         - |
             docker buildx build \

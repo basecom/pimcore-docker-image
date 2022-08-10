@@ -134,9 +134,6 @@ RUN mkdir -p /opt/bsc/bash \
 
 ENV HISTFILE=/opt/bsc/bash/.bash_history
 
-# Install Fig
-RUN curl -Ls fig.io/install | bash
-
 # Configure user and permissions
 RUN addgroup --gid 1000 application \
  && adduser --uid 1000 --gid 1000 application

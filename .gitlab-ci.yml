@@ -47,11 +47,11 @@ stages:
 
 .build image buildx:
     stage: build
-    extends: .docker buildx
+#    extends: .docker buildx
     script:
         - |
             docker buildx build \
-                --builder=buildkitd \
+                --builder=kube \
                 --push \
                 --platform "linux/amd64,linux/arm64/v8" \
                 --cache-from type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-cache \

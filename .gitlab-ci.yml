@@ -11,16 +11,7 @@ stages:
 
 .docker buildx:
     image: docker:stable
-    services:
-        -   name: docker:20-dind
-            entrypoint: ['env', '-u', 'DOCKER_HOST']
-            command: ['dockerd-entrypoint.sh', '--experimental']
-    variables:
-        DOCKER_HOST: tcp://docker:2375
-        DOCKER_DRIVER: overlay2
-        DOCKER_CLI_EXPERIMENTAL: enabled
     before_script:
-        - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
         - mkdir -p ~/.docker/cli-plugins/
         - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.8.2/buildx-v0.8.2.linux-amd64
         - chmod a+x ~/.docker/cli-plugins/docker-buildx
@@ -47,8 +38,7 @@ stages:
 
 .build image buildx:
     stage: build
-#    extends: .docker buildx
-    image: docker:stable
+    extends: .docker buildx
     script:
         - |
             docker buildx build \

@@ -10,13 +10,12 @@ stages:
 
 
 .docker buildx:
-    image: moby/buildkit:master
-#    image: docker:stable
-#    before_script:
-#        - mkdir -p ~/.docker/cli-plugins/
-#        - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.8.2/buildx-v0.8.2.linux-amd64
-#        - chmod a+x ~/.docker/cli-plugins/docker-buildx
-#        - docker buildx create --driver kubernetes --driver-opt=rootless=true --platform "linux/amd64,linux/arm64/v8" --use --config files/docker/buildkitd.toml
+    image: docker:stable
+    before_script:
+        - mkdir -p ~/.docker/cli-plugins/
+        - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.8.2/buildx-v0.8.2.linux-amd64
+        - chmod a+x ~/.docker/cli-plugins/docker-buildx
+        - docker buildx create --driver docker-container --platform "linux/amd64,linux/arm64/v8" --use --config files/docker/buildkitd.toml
 
 .kubernetes kaniko:
     image:
@@ -42,13 +41,6 @@ stages:
     stage: build
     extends: .docker buildx
     script:
-        - |
-            buildctl \
-                --addr kube-pod://buildkitd \
-                build \
-                --frontend dockerfile.v0 \
-                --local context=${PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile \
-                --local dockerfile=${PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile
         - |
             docker buildx build \
                 --push \

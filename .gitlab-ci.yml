@@ -15,6 +15,7 @@ stages:
         - mkdir -p ~/.docker/cli-plugins/
         - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.8.2/buildx-v0.8.2.linux-amd64
         - chmod a+x ~/.docker/cli-plugins/docker-buildx
+        - docker buildx create --driver kubernetes --driver-opt=rootless=true --platform "linux/amd64,linux/arm64/v8" --use --config files/docker/buildkitd.toml
 
 .kubernetes kaniko:
     image:
@@ -42,7 +43,6 @@ stages:
     script:
         - |
             docker buildx build \
-                --builder=kube \
                 --push \
                 --platform "linux/amd64,linux/arm64/v8" \
                 --cache-from type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-cache \

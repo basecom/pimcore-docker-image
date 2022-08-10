@@ -42,6 +42,13 @@ stages:
     extends: .docker buildx
     script:
         - |
+            buildctl \
+                --addr kube-pod://buildkitd \
+                build \
+                --frontend dockerfile.v0 \
+                --local context=${PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile \
+                --local dockerfile=${PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile
+        - |
             docker buildx build \
                 --push \
                 --platform "linux/amd64,linux/arm64/v8" \

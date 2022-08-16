@@ -42,6 +42,7 @@ RUN apt-get update \
     libkrb5-dev \
     liblcms2-dev \
     libldap2-dev \
+    libldap-common \
     liblqr-1-0-dev \
     libltdl-dev \
     liblzma-dev \

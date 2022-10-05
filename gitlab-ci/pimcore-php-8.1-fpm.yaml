@@ -1,6 +1,6 @@
 # pimcore php 8.1 fpm
 build pimcore php-8.1-fpm amd:
-    extends: .build image kaniko
+    extends: .build image
     variables:
         IMAGE_NAME: php
         IMAGE_TAG: 8.1-fpm-pimcore
@@ -11,7 +11,7 @@ build pimcore php-8.1-fpm amd:
         ARCH: amd
 
 build pimcore php-8.1-fpm arm:
-    extends: .build image kaniko
+    extends: .build image
     tags:
          - 'bsc-eks-arm64'
     variables:
@@ -31,12 +31,3 @@ publish pimcore php-8.1-fpm:
     needs:
         - build pimcore php-8.1-fpm amd
         - build pimcore php-8.1-fpm arm
-
-#build pimcore php-8.1-fpm:
-#    extends: .build image buildx
-#    variables:
-#        IMAGE_NAME: php
-#        IMAGE_TAG: 8.1-fpm-pimcore
-#        PHP_VERSION: '8.1'
-#        IMAGE_VARIANT: fpm
-#        SYSTEM: pimcore

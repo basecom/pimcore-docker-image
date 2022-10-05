@@ -75,11 +75,12 @@ RUN apt-get update \
     unzip \
     webp \
     wget \
-    wkhtmltopdf \
+    chromium \
     zlib1g-dev \
  && apt-get autoremove -y \
  && apt-get clean \
- && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
+ && ln -s /usr/bin/chromium /usr/bin/chromium-browser
 
 # special system extensions
 ###special-system-extensions###

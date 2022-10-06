@@ -23,6 +23,8 @@ RUN apt-get update \
  && apt-get update \
  && apt-get install -y --no-install-recommends \
     bash \
+    chromium \
+    chromium-sandbox \
     exiftool \
     facedetect \
     ffmpeg \
@@ -75,11 +77,12 @@ RUN apt-get update \
     unzip \
     webp \
     wget \
-    wkhtmltopdf \
     zlib1g-dev \
  && apt-get autoremove -y \
  && apt-get clean \
- && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
+ && ln -s /usr/bin/chromium /usr/bin/chromium-browser
+
 
 # special system extensions
 RUN apt-get update \

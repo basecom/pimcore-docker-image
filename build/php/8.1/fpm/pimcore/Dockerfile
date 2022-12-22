@@ -25,6 +25,7 @@ RUN apt-get update \
     bash \
     chromium \
     chromium-sandbox \
+    default-mysql-client \
     exiftool \
     facedetect \
     ffmpeg \

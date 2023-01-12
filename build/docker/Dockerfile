@@ -13,7 +13,7 @@ FROM docker:20.10
 COPY --from=builder /docker-compose /usr/libexec/docker/cli-plugins/docker-compose
 COPY --from=builder /usr/bin/qemu-system-* /usr/bin/
 
-COPY --from=docker/buildx-bin:v0.9.1 /buildx /usr/libexec/docker/cli-plugins/docker-buildx
+COPY --from=docker/buildx-bin:0.9.1 /buildx /usr/libexec/docker/cli-plugins/docker-buildx
 
 # Use buildkitd.toml as default for buildx commands
 # See https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#-specify-a-configuration-file-for-the-buildkitd-daemon---config

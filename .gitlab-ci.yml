@@ -22,7 +22,7 @@ stages:
     before_script:
         - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
         - mkdir -p ~/.docker/cli-plugins/
-        - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.10.0/buildx-v0.10.0.linux-amd64
+        - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.9.1/buildx-v0.9.1.linux-amd64
         - chmod a+x ~/.docker/cli-plugins/docker-buildx
 
 .kubernetes kaniko:

@@ -8,7 +8,7 @@ RUN curl -SL https://github.com/docker/compose/releases/download/v2.15.1/docker-
  && chmod +x /docker-compose
 
 
-FROM docker:20.10
+FROM docker:stable
 
 COPY --from=builder /docker-compose /usr/libexec/docker/cli-plugins/docker-compose
 COPY --from=builder /usr/bin/qemu-system-* /usr/bin/

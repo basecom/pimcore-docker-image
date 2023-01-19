@@ -29,8 +29,9 @@ publish pimcore php-8.1-cli:
         IMAGE_NAME: php
         IMAGE_TAG: 8.1-cli-pimcore
     needs:
-        - build pimcore php-8.1-cli amd
-        - build pimcore php-8.1-cli arm
+        - build pimcore php-8.1-cli
+#        - build pimcore php-8.1-cli amd
+#        - build pimcore php-8.1-cli arm
 
 build pimcore php-8.1-cli:
     extends: .build image buildx

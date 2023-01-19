@@ -29,8 +29,9 @@ publish pimcore php-8.1-fpm:
         IMAGE_NAME: php
         IMAGE_TAG: 8.1-fpm-pimcore
     needs:
-        - build pimcore php-8.1-fpm amd
-        - build pimcore php-8.1-fpm arm
+        - build pimcore php-8.1-fpm
+#        - build pimcore php-8.1-fpm amd
+#        - build pimcore php-8.1-fpm arm
 
 build pimcore php-8.1-fpm:
     extends: .build image buildx

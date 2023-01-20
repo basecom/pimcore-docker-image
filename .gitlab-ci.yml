@@ -41,6 +41,8 @@ stages:
             -f ${CI_PROJECT_DIR}/dist/images/${IMAGE_NAME}/${IMAGE_TAG}/Dockerfile \
             -t ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH} \
             ${CI_PROJECT_DIR}
+    needs:
+        - build docker stable
 
 
 .publish image:
@@ -54,6 +56,8 @@ stages:
                 --amend ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-amd \
                 --amend ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-arm
         - docker manifest push ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}
+    needs:
+        - build docker stable
 
 include:
     - local: /gitlab-ci/docker-stable.yaml

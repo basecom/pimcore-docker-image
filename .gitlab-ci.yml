@@ -38,9 +38,8 @@ stages:
             --platform ${PLATFORM} \
             --cache-from type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:cache-${ARCH} \
             --cache-to type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:cache-${ARCH} \
-            -f ${CI_PROJECT_DIR}/dist/images/${IMAGE_NAME}/${IMAGE_TAG}/Dockerfile \
             -t ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH} \
-            ${CI_PROJECT_DIR}
+            ${CI_PROJECT_DIR}/dist/images/${IMAGE_NAME}/${IMAGE_TAG}
     needs:
         - build docker stable
 

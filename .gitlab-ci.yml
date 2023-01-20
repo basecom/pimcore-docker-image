@@ -28,6 +28,7 @@ stages:
 .build image:
     stage: build
     image: registry.gitlab.com/basecom-public/docker/image/docker:stable
+    timeout: 3h
     before_script:
         - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     script:

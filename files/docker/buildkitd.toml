@@ -1,4 +1,0 @@
-debug = true
-
-[registry."docker.io"]
-  mirrors = ["docker-cache.runner.basecom.cloud"]

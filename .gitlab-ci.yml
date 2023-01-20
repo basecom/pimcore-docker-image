@@ -3,70 +3,51 @@ default:
         - 'docker'
     interruptible: true
 
+services:
+    -   name: docker:dind
+        entrypoint: ['env', '-u', 'DOCKER_HOST']
+        command: ['dockerd-entrypoint.sh', '--experimental']
+
+variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+    DOCKER_CLI_EXPERIMENTAL: enabled
+
 stages:
     - build
     - publish
-    - clean
-
 
 .docker buildx:
     image: docker:stable
-    services:
-        -   name: docker:dind
-            entrypoint: ['env', '-u', 'DOCKER_HOST']
-            command: ['dockerd-entrypoint.sh', '--experimental']
-    variables:
-        DOCKER_HOST: tcp://docker:2375
-        DOCKER_DRIVER: overlay2
-        DOCKER_CLI_EXPERIMENTAL: enabled
     before_script:
         - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
         - mkdir -p ~/.docker/cli-plugins/
         - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.9.1/buildx-v0.9.1.linux-amd64
         - chmod a+x ~/.docker/cli-plugins/docker-buildx
 
-.kubernetes kaniko:
-    image:
-        name: gcr.io/kaniko-project/executor:debug
-        entrypoint: ['']
+.build image:
+    stage: build
+    image: registry.gitlab.com/basecom-public/docker/image/docker:stable
     before_script:
-        - mkdir -p /kaniko/.docker
-        - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-
-
-.build image kaniko:
-    stage: build
-    extends: .kubernetes kaniko
+        - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     script:
-        - |
-            /kaniko/executor \
-                --context "${CI_PROJECT_DIR}" \
-                --dockerfile "${CI_PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile" \
-                --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH}"  \
-                --cache=true
-
-.build image buildx:
-    stage: build
-    extends: .docker buildx
-    script:
-        - |
-            docker buildx create \
-                --platform "linux/amd64,linux/arm64/v8" \
-                --config files/docker/buildkitd.toml \
-                --use
+        - docker buildx create --platform "${PLATFORM}" --use
         - |
             docker buildx build \
-                --push \
-                --platform "linux/amd64,linux/arm64/v8" \
-                --cache-from type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-cache \
-                --cache-to type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-cache \
-                -f ${PROJECT_DIR}/build/${IMAGE_NAME}/${PHP_VERSION}/${IMAGE_VARIANT}/${SYSTEM}/Dockerfile \
-                -t ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG} \
-                ${CI_PROJECT_DIR}
+            --push \
+            --platform ${PLATFORM} \
+            --cache-from type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:cache-${ARCH} \
+            --cache-to type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:cache-${ARCH} \
+            -f ${CI_PROJECT_DIR}/dist/images/${IMAGE_NAME}/${IMAGE_TAG}/Dockerfile \
+            -t ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH} \
+            ${CI_PROJECT_DIR}
+
 
 .publish image:
     stage: publish
-    extends: .docker buildx
+    image: registry.gitlab.com/basecom-public/docker/image/docker:stable
+    before_script:
+        - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     script:
         - |
             docker manifest create ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG} \
@@ -74,19 +55,7 @@ stages:
                 --amend ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-arm
         - docker manifest push ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}
 
-.clean image tags:
-    stage: clean
-    variables:
-        REG_SHA256: ade837fc5224acd8c34732bf54a94f579b47851cc6a7fd5899a98386b782e228
-        REG_VERSION: 0.16.1
-    before_script:
-        - apk add --no-cache curl
-        - curl --fail --show-error --location "https://github.com/genuinetools/reg/releases/download/v$REG_VERSION/reg-linux-amd64" --output /usr/local/bin/reg
-        - echo "$REG_SHA256  /usr/local/bin/reg" | sha256sum -c -
-        - chmod a+x /usr/local/bin/reg
-    script:
-        - /usr/local/bin/reg rm -d --auth-url ${CI_REGISTRY} -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${IMAGE_TAG}-arm
-        - /usr/local/bin/reg rm -d --auth-url ${CI_REGISTRY} -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${IMAGE_TAG}-amd
-
 include:
-    - local: /gitlab-ci/includes.yaml
+    - local: /gitlab-ci/docker-stable.yaml
+    - local: /gitlab-ci/pimcore-php-8.1-cli.yaml
+    - local: /gitlab-ci/pimcore-php-8.1-fpm.yaml

@@ -1,27 +1,18 @@
-# pimcore php 8.1 cli
-#build pimcore php-8.1-cli amd:
-#    extends: .build image kaniko
-#    variables:
-#        IMAGE_NAME: php
-#        IMAGE_TAG: 8.1-cli-pimcore
-#        PHP_VERSION: '8.1'
-#        IMAGE_VARIANT: cli
-#        SYSTEM: pimcore
-#        PLATFORM: linux/amd64,linux/arm64/v8
-#        ARCH: amd
-#
-#build pimcore php-8.1-cli arm:
-#    extends: .build image kaniko
-#    tags:
-#         - 'bsc-eks-arm64'
-#    variables:
-#        IMAGE_NAME: php
-#        IMAGE_TAG: 8.1-cli-pimcore
-#        PHP_VERSION: '8.1'
-#        IMAGE_VARIANT: cli
-#        SYSTEM: pimcore
-#        PLATFORM: linux/arm64/v8
-#        ARCH: arm
+build pimcore php-8.1-cli amd:
+    extends: .build image
+    variables:
+        IMAGE_NAME: php
+        IMAGE_TAG: 8.1-cli-pimcore
+        PLATFORM: linux/amd64
+        ARCH: amd
+
+build pimcore php-8.1-cli arm:
+    extends: .build image
+    variables:
+        IMAGE_NAME: php
+        IMAGE_TAG: 8.1-cli-pimcore
+        PLATFORM: linux/arm64/v8
+        ARCH: arm
 
 publish pimcore php-8.1-cli:
     extends: .publish image
@@ -29,15 +20,5 @@ publish pimcore php-8.1-cli:
         IMAGE_NAME: php
         IMAGE_TAG: 8.1-cli-pimcore
     needs:
-        - build pimcore php-8.1-cli
-#        - build pimcore php-8.1-cli amd
-#        - build pimcore php-8.1-cli arm
-
-build pimcore php-8.1-cli:
-    extends: .build image buildx
-    variables:
-        IMAGE_NAME: php
-        IMAGE_TAG: 8.1-cli-pimcore
-        PHP_VERSION: '8.1'
-        IMAGE_VARIANT: cli
-        SYSTEM: pimcore
+        - build pimcore php-8.1-cli amd
+        - build pimcore php-8.1-cli arm

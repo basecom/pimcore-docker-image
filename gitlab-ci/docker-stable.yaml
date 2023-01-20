@@ -7,7 +7,7 @@ build docker stable:
         - |
             docker buildx create \
             --platform "linux/amd64,linux/arm64/v8" \
-            --config files/docker/buildkitd.toml \
+            --config variants/docker/buildkitd.toml \
             --use
         - |
             docker buildx build \
@@ -15,7 +15,7 @@ build docker stable:
             --platform linux/arm64/v8,linux/amd64 \
             --cache-from ${CI_REGISTRY_IMAGE}/docker:cache \
             --cache-to ${CI_REGISTRY_IMAGE}/docker:cache \
-            -f ${CI_PROJECT_DIR}/build/docker/Dockerfile \
+            -f ${CI_PROJECT_DIR}/dist/images/docker/stable/Dockerfile \
             -t ${CI_REGISTRY_IMAGE}/docker:stable \
             ${CI_PROJECT_DIR}
 

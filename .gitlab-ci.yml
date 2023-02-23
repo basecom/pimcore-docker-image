@@ -22,7 +22,7 @@ stages:
         - mkdir -p ~/.docker/cli-plugins/
         - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.9.1/buildx-v0.9.1.linux-amd64
         - chmod a+x ~/.docker/cli-plugins/docker-buildx
-        - docker context create test
+        - docker context create build
 
 .build image:
     stage: build
@@ -31,7 +31,7 @@ stages:
     before_script:
         - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     script:
-        - docker buildx create test --platform "${PLATFORM}" --use
+        - docker buildx create build --platform "${PLATFORM}" --use
         - |
             docker buildx build \
             --push \

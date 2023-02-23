@@ -5,7 +5,7 @@ build docker stable:
         - docker
     script:
         - |
-            docker buildx create test \
+            docker buildx create build \
             --platform "linux/amd64,linux/arm64/v8" \
             --config variants/docker/buildkitd.toml \
             --use

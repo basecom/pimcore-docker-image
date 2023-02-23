@@ -1,6 +1,6 @@
 default:
     tags:
-        - 'docker'
+        - 'bsc-eks-arm64'
     interruptible: true
 
 services:
@@ -10,7 +10,9 @@ services:
 
 variables:
     DOCKER_HOST: tcp://docker:2376
-    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     DOCKER_CLI_EXPERIMENTAL: enabled
 
 stages:

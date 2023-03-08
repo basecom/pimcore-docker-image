@@ -1,65 +1,64 @@
 default:
-    tags:
-        - 'docker'
-    interruptible: true
+  tags:
+    - 'docker'
+  interruptible: true
 
 services:
-    -   name: docker:dind
-        entrypoint: ['env', '-u', 'DOCKER_HOST']
-        command: ['dockerd-entrypoint.sh', '--experimental']
+  - name: docker:23-dind
+    entrypoint: ['env', '-u', 'DOCKER_HOST']
+    command: ['dockerd-entrypoint.sh', '--experimental']
 
 variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_DRIVER: overlay2
-    DOCKER_CLI_EXPERIMENTAL: enabled
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  DOCKER_CLI_EXPERIMENTAL: enabled
 
 stages:
-    - build
-    - publish
+  - build
+  - publish
 
 .docker buildx:
-    image: docker:stable
-    before_script:
-        - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-        - mkdir -p ~/.docker/cli-plugins/
-        - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.9.1/buildx-v0.9.1.linux-amd64
-        - chmod a+x ~/.docker/cli-plugins/docker-buildx
+  image: docker:23
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - mkdir -p ~/.docker/cli-plugins/
+    - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.9.1/buildx-v0.9.1.linux-amd64
+    - chmod a+x ~/.docker/cli-plugins/docker-buildx
 
 .build image:
-    stage: build
-    image: registry.gitlab.com/basecom-public/docker/image/docker:stable
-    timeout: 3h
-    before_script:
-        - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    script:
-        - docker buildx create --platform "${PLATFORM}" --use
-        - |
-            docker buildx build \
-            --push \
-            --platform ${PLATFORM} \
-            --cache-from type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:cache-${IMAGE_TAG}-${ARCH} \
-            --cache-to type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:cache-${IMAGE_TAG}-${ARCH} \
-            -t ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH} \
-            ${CI_PROJECT_DIR}/dist/images/${IMAGE_NAME}/${IMAGE_TAG}
-    needs:
-        - build docker stable
-
+  stage: build
+  image: registry.gitlab.com/basecom-public/docker/image/docker:stable
+  timeout: 3h
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  script:
+    - docker buildx create --platform "${PLATFORM}" --use
+    - |
+      docker buildx build \
+      --push \
+      --platform ${PLATFORM} \
+      --cache-from type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:cache-${IMAGE_TAG}-${ARCH} \
+      --cache-to type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:cache-${IMAGE_TAG}-${ARCH} \
+      -t ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH} \
+      ${CI_PROJECT_DIR}/dist/images/${IMAGE_NAME}/${IMAGE_TAG}
+  needs:
+    - build docker stable
 
 .publish image:
-    stage: publish
-    image: registry.gitlab.com/basecom-public/docker/image/docker:stable
-    before_script:
-        - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    script:
-        - |
-            docker manifest create ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG} \
-                --amend ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-amd \
-                --amend ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-arm
-        - docker manifest push ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}
-    needs:
-        - build docker stable
+  stage: publish
+  image: registry.gitlab.com/basecom-public/docker/image/docker:stable
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  script:
+    - |
+      docker manifest create ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG} \
+          --amend ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-amd \
+          --amend ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-arm
+    - docker manifest push ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}
+  needs:
+    - build docker stable
 
 include:
-    - local: /gitlab-ci/docker-stable.yaml
-    - local: /gitlab-ci/pimcore-php-8.1-cli.yaml
-    - local: /gitlab-ci/pimcore-php-8.1-fpm.yaml
+  - local: /gitlab-ci/docker-stable.yaml
+  - local: /gitlab-ci/pimcore-php-8.1-cli.yaml
+  - local: /gitlab-ci/pimcore-php-8.1-fpm.yaml

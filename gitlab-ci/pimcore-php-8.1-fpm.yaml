@@ -8,8 +8,6 @@ build pimcore php-8.1-fpm amd:
 
 build pimcore php-8.1-fpm arm:
     extends: .build image
-    tags:
-        - 'bsc-aws-arm'
     variables:
         IMAGE_NAME: php
         IMAGE_TAG: 8.1-fpm-pimcore

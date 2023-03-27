@@ -71,6 +71,7 @@ RUN apt-get update \
     pngcrush \
     poppler-utils \
     unzip \
+    vim \
     webp \
     wget \
     zlib1g-dev \

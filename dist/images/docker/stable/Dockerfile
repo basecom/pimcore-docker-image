@@ -5,7 +5,7 @@ RUN apk add curl \
     qemu-system-$(uname -m)
 
 RUN curl -SL https://github.com/docker/compose/releases/download/v2.15.1/docker-compose-linux-$(uname -m) -o /docker-compose \
-    && chmod +x /docker-compose
+ && chmod +x /docker-compose
 
 FROM docker:23
 

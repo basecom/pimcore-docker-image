@@ -2,7 +2,9 @@
   "images": {
     "php": [
       "php/8.1/cli/pimcore:8.1-cli-pimcore",
-      "php/8.1/fpm/pimcore:8.1-fpm-pimcore"
+      "php/8.1/fpm/pimcore:8.1-fpm-pimcore",
+      "php/8.2/cli/pimcore:8.2-cli-pimcore",
+      "php/8.2/fpm/pimcore:8.2-fpm-pimcore"
     ],
     "docker": [
       "docker:stable"

@@ -77,6 +77,7 @@ RUN apt-get update \
     rsync \
     supervisor \
     unzip \
+    vim \
     webp \
     wget \
     zlib1g-dev \

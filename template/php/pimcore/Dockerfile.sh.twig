@@ -1,17 +1,6 @@
-# syntax=docker/dockerfile:1
-FROM php:8.1-fpm-bullseye
+{% extends 'template/php/Dockerfile.sh.twig' %}
 
-LABEL org.opencontainers.image.authors="DevOps Team <devops@basecom.de>"
-LABEL org.opencontainers.image.vendor="basecom GmbH & Co. KG"
-
-# install composer from composer image
-COPY --from=composer:2.5.2 /usr/bin/composer /usr/bin/composer
-
-# set timezone
-ENV TZ=Europe/Berlin
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# install system extensions
+{% block systemExtensions %}
 RUN apt-get update \
  && apt-get install -y lsb-release \
  && echo "deb http://deb.debian.org/debian $(lsb_release -sc)-backports main" > /etc/apt/sources.list.d/backports.list \
@@ -75,12 +64,21 @@ RUN apt-get update \
     webp \
     wget \
     zlib1g-dev \
-	 && apt-get autoremove -y \
+	{% if php.variant == 'cli' %}
+    git \
+	jq \
+	less \
+	nano \
+	rsync \
+	supervisor \
+	{% endif %}
+ && apt-get autoremove -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
  && ln -s /usr/bin/chromium /usr/bin/chromium-browser
+{% endblock %}
 
-# install php extensions
+{% block phpExtensions %}
 RUN apt-get update \
  && apt-get install -y \
     autoconf \
@@ -101,8 +99,9 @@ RUN apt-get update \
  && apt-get remove -y autoconf automake libtool pkg-config libz-dev build-essential g++ \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+{% endblock %}
 
-# install additional packages
+{% block additionalPackages %}
 # cjpeg
 RUN curl -fsSLO "https://github.com/imagemin/mozjpeg-bin/raw/main/vendor/linux/cjpeg" \
  && chmod 0755 cjpeg \
@@ -117,23 +116,4 @@ RUN curl -fsSLO "https://github.com/imagemin/zopflipng-bin/raw/main/vendor/linux
 RUN curl -fsSLO "https://github.com/imagemin/pngout-bin/raw/main/vendor/linux/x64/pngout" \
  && chmod 0755 pngout \
  && mv pngout /usr/local/bin/pngout
-
-# configure xDebug
-RUN echo "xdebug.idekey = PHPSTORM" >> /usr/local/etc/php/conf.d/20-xdebug.ini; \
-    echo "xdebug.mode = off" >> /usr/local/etc/php/conf.d/20-xdebug.ini; \
-    echo "xdebug.start_with_request = yes" >> /usr/local/etc/php/conf.d/20-xdebug.ini; \
-    echo "xdebug.discover_client_host = 1" >> /usr/local/etc/php/conf.d/20-xdebug.ini; \
-    echo "xdebug.client_host = 127.0.0.1" >> /usr/local/etc/php/conf.d/20-xdebug.ini;
-
-# Configure bash
-RUN mkdir -p /opt/bsc/bash \
- && touch /opt/bsc/bash/.bash_history
-
-ENV HISTFILE=/opt/bsc/bash/.bash_history
-
-# Configure user and permissions
-RUN addgroup --gid 1000 application \
- && adduser --uid 1000 --gid 1000 application
-
-RUN chown -R 1000:1000 /opt/bsc \
- && chown -R 1000:1000 /var/www
+{% endblock %}

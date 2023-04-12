@@ -4,33 +4,49 @@ default:
   interruptible: true
 
 services:
-  - name: docker:23-dind
-    entrypoint: ['env', '-u', 'DOCKER_HOST']
-    command: ['dockerd-entrypoint.sh', '--experimental']
+  - name: docker:$DOCKER_VERSION-dind
+    entrypoint: ["env", "-u", "DOCKER_HOST"]
+    command: ["dockerd-entrypoint.sh", "--experimental"]
 
 variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_DRIVER: overlay2
   DOCKER_CLI_EXPERIMENTAL: enabled
+  PIPELINE_IMAGE_TAG: ${CI_COMMIT_REF_SLUG}
+  DOCKER_VERSION: 23
+  BUILDX_VERSION: 0.10.4
 
 stages:
+  - pre-build
+  - test-build
   - build
   - publish
 
 .docker buildx:
-  image: docker:23
+  image: docker:$DOCKER_VERSION
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     - mkdir -p ~/.docker/cli-plugins/
-    - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.9.1/buildx-v0.9.1.linux-amd64
+    - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-amd64
     - chmod a+x ~/.docker/cli-plugins/docker-buildx
 
-.build image:
-  stage: build
-  image: registry.gitlab.com/basecom-public/docker/image/docker:stable
-  timeout: 3h
+.build image base:
+  image: registry.gitlab.com/basecom-public/docker/image/docker:$BUILD_IMAGE_TAG
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        BUILD_IMAGE_TAG: "stable-${PIPELINE_IMAGE_TAG}"
+        PUBLISH_IMAGE_TAG: "${IMAGE_TAG}-${PIPELINE_IMAGE_TAG}"
+    - if: $CI_COMMIT_BRANCH == "main"
+      variables:
+        BUILD_IMAGE_TAG: "stable"
+        PUBLISH_IMAGE_TAG: "${IMAGE_TAG}"
+
+.build image test:
+  extends: .build image base
+  timeout: 3h
   script:
     - docker buildx create --platform "${PLATFORM}" --use
     - |
@@ -39,24 +55,30 @@ stages:
       --platform ${PLATFORM} \
       --cache-from type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:cache-${IMAGE_TAG}-${ARCH} \
       --cache-to type=registry,ref=${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:cache-${IMAGE_TAG}-${ARCH} \
-      -t ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH} \
+      -t ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${PUBLISH_IMAGE_TAG}-${ARCH} \
       ${CI_PROJECT_DIR}/dist/images/${IMAGE_NAME}/${IMAGE_TAG}
-  needs:
-    - build docker stable
 
-.publish image:
-  stage: publish
-  image: registry.gitlab.com/basecom-public/docker/image/docker:stable
-  before_script:
-    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+.build image:
+  extends: .build image test
+  stage: build
+  needs:
+    - test docker publish
+
+.publish image test:
+  extends: .build image base
+  image: registry.gitlab.com/basecom-public/docker/image/docker:$BUILD_IMAGE_TAG
   script:
     - |
-      docker manifest create ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG} \
-          --amend ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-amd \
-          --amend ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}-arm
-    - docker manifest push ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${IMAGE_TAG}
+      docker manifest create ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${PUBLISH_IMAGE_TAG} \
+          --amend ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${PUBLISH_IMAGE_TAG}-amd \
+          --amend ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${PUBLISH_IMAGE_TAG}-arm
+    - docker manifest push ${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${PUBLISH_IMAGE_TAG}
+
+.publish image:
+  extends: .publish image test
+  stage: publish
   needs:
-    - build docker stable
+    - test docker publish
 
 include:
   - local: /gitlab-ci/docker-stable.yaml

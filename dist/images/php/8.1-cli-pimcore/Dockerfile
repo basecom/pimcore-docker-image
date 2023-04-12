@@ -5,7 +5,7 @@ LABEL org.opencontainers.image.authors="DevOps Team <devops@basecom.de>"
 LABEL org.opencontainers.image.vendor="basecom GmbH & Co. KG"
 
 # install composer from composer image
-COPY --from=composer:2.3 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.5.2 /usr/bin/composer /usr/bin/composer
 
 # set timezone
 ENV TZ=Europe/Berlin
@@ -25,12 +25,9 @@ RUN apt-get update \
     facedetect \
     ffmpeg \
     ghostscript \
-    git \
     graphviz \
     html2text \
     jpegoptim \
-    jq \
-    less \
     libbz2-dev \
     libc-client-dev \
     libdjvulibre-dev \
@@ -69,19 +66,22 @@ RUN apt-get update \
     libxslt1-dev \
     libxt-dev \
     libzip-dev \
-    nano \
     net-tools \
     opencv-data \
     pngcrush \
     poppler-utils \
-    rsync \
-    supervisor \
     unzip \
     vim \
     webp \
     wget \
     zlib1g-dev \
- && apt-get autoremove -y \
+	    git \
+	jq \
+	less \
+	nano \
+	rsync \
+	supervisor \
+	 && apt-get autoremove -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
  && ln -s /usr/bin/chromium /usr/bin/chromium-browser

@@ -1,18 +1,59 @@
 build docker stable:
-    stage: build
-    extends: .docker buildx
-    script:
-        - |
-            docker buildx create \
-            --platform "linux/amd64,linux/arm64/v8" \
-            --config variants/docker/buildkitd.toml \
-            --use
-        - |
-            docker buildx build \
-            --push \
-            --platform linux/arm64/v8,linux/amd64 \
-            --cache-from ${CI_REGISTRY_IMAGE}/docker:cache \
-            --cache-to ${CI_REGISTRY_IMAGE}/docker:cache \
-            -t ${CI_REGISTRY_IMAGE}/docker:stable \
-            ${CI_PROJECT_DIR}/dist/images/docker/stable
+  stage: pre-build
+  extends: .docker buildx
+  script:
+    - |
+      docker buildx create \
+      --platform "linux/amd64,linux/arm64/v8" \
+      --config dist/images/docker/stable/buildkitd.toml \
+      --use
+    - |
+      docker buildx build \
+      --provenance false \
+      --push \
+      --platform linux/arm64/v8,linux/amd64 \
+      --cache-from ${CI_REGISTRY_IMAGE}/docker:cache \
+      --cache-to ${CI_REGISTRY_IMAGE}/docker:cache \
+      --build-arg DOCKER_VERSION=$DOCKER_VERSION \
+      --build-arg BUILDX_VERSION=$BUILDX_VERSION \
+      -t ${CI_REGISTRY_IMAGE}/docker:${BUILD_IMAGE_TAG} \
+      ${CI_PROJECT_DIR}/dist/images/docker/stable
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        BUILD_IMAGE_TAG: "stable-${PIPELINE_IMAGE_TAG}"
+    - if: $CI_COMMIT_BRANCH == "main"
+      variables:
+        BUILD_IMAGE_TAG: "stable"
 
+test docker build amd:
+  stage: test-build
+  extends: .build image test
+  needs:
+    - build docker stable
+  variables:
+    IMAGE_NAME: docker
+    IMAGE_TAG: test
+    PLATFORM: linux/amd64
+    ARCH: amd
+
+test docker build arm:
+  stage: test-build
+  extends: .build image test
+  needs:
+    - build docker stable
+  variables:
+    IMAGE_NAME: docker
+    IMAGE_TAG: test
+    PLATFORM: linux/arm64/v8
+    ARCH: arm
+
+test docker publish:
+  stage: test-build
+  extends: .publish image test
+  variables:
+    IMAGE_NAME: docker
+    IMAGE_TAG: test
+  needs:
+    - test docker build amd
+    - test docker build arm

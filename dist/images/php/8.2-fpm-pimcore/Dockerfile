@@ -68,7 +68,6 @@ RUN apt-get update \
     libzip-dev \
     net-tools \
     opencv-data \
-    php-excimer \
     pngcrush \
     poppler-utils \
     unzip \
@@ -93,8 +92,8 @@ RUN apt-get update \
     g++ \
  && docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp \
  && docker-php-ext-install intl mbstring mysqli bcmath gd bz2 soap xsl pdo pdo_mysql fileinfo exif zip opcache ldap \
- && pecl install redis apcu xdebug imagick pcov amqp \
- && docker-php-ext-enable redis imagick apcu xdebug pcov amqp \
+ && pecl install redis apcu xdebug imagick pcov amqp excimer \
+ && docker-php-ext-enable redis imagick apcu xdebug pcov amqp excimer \
  && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
  && docker-php-ext-install imap \
  && docker-php-ext-enable imap \

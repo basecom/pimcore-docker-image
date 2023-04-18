@@ -68,6 +68,7 @@ RUN apt-get update \
     libzip-dev \
     net-tools \
     opencv-data \
+    php-excimer \
     pngcrush \
     poppler-utils \
     unzip \

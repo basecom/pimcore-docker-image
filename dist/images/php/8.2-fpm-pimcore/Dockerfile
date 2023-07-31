@@ -104,8 +104,13 @@ RUN apt-get update \
 
 # install additional packages
 # cjpeg
-RUN curl -fsSLO "https://github.com/imagemin/mozjpeg-bin/raw/main/vendor/linux/cjpeg" \
- && chmod 0755 cjpeg \
+RUN if [ `uname -m` = "aarch64" ]; then \
+      curl -fsSLO "https://github.com/imagemin/mozjpeg-bin/raw/main/vendor/linux/arm64/cjpeg"; \
+    else \
+      curl -fsSLO "https://github.com/imagemin/mozjpeg-bin/raw/main/vendor/linux/amd64/cjpeg"; \
+    fi
+
+RUN chmod 0755 cjpeg;
  && mv cjpeg /usr/local/bin/cjpeg
 
 # Zopfli

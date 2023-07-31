@@ -110,7 +110,7 @@ RUN if [ `uname -m` = "aarch64" ]; then \
       curl -fsSLO "https://github.com/imagemin/mozjpeg-bin/raw/main/vendor/linux/amd64/cjpeg"; \
     fi
 
-RUN chmod 0755 cjpeg;
+RUN chmod 0755 cjpeg
  && mv cjpeg /usr/local/bin/cjpeg
 
 # Zopfli

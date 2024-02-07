@@ -93,7 +93,7 @@ RUN apt-get update \
  && docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp \
  && docker-php-ext-install intl mbstring mysqli bcmath gd bz2 soap xsl pdo pdo_mysql fileinfo exif ftp zip opcache ldap sockets \
  && pecl install redis apcu xdebug imagick pcov amqp excimer \
- && docker-php-ext-enable redis imagick apcu xdebug pcov amqp excimer \
+ && docker-php-ext-enable redis imagick apcu xdebug pcov amqp excimer ftp \
  && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
  && docker-php-ext-install imap \
  && docker-php-ext-enable imap \

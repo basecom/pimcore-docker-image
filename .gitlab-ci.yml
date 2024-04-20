@@ -11,8 +11,6 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_CLI_EXPERIMENTAL: enabled
   PIPELINE_IMAGE_TAG: ${CI_COMMIT_REF_SLUG}
-  DOCKER_VERSION: 24
-  BUILDX_VERSION: 0.10.4
 
 stages:
   - pre-build

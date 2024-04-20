@@ -1,15 +1,11 @@
-ARG DOCKER_VERSION
-
 FROM alpine AS builder
 
 RUN apk add qemu-img \
     qemu-system-$(uname -m)
 
-FROM docker:$DOCKER_VERSION
+FROM docker:26
 
 COPY --from=builder /usr/bin/qemu-system-* /usr/bin/
-
-COPY --from=docker/buildx-bin:0.10.4 /buildx /usr/libexec/docker/cli-plugins/docker-buildx
 
 # Use buildkitd.toml as default for buildx commands
 # See https://github.com/docker/buildx/blob/master/docs/reference/buildx_create.md#-specify-a-configuration-file-for-the-buildkitd-daemon---config

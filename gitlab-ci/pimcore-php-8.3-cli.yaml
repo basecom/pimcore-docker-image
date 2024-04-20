@@ -1,0 +1,24 @@
+build pimcore php-8.3-cli amd:
+    extends: .build image
+    variables:
+        IMAGE_NAME: php
+        IMAGE_TAG: 8.3-cli-pimcore
+        PLATFORM: linux/amd64
+        ARCH: amd
+
+build pimcore php-8.3-cli arm:
+    extends: .build image
+    variables:
+        IMAGE_NAME: php
+        IMAGE_TAG: 8.3-cli-pimcore
+        PLATFORM: linux/arm64/v8
+        ARCH: arm
+
+publish pimcore php-8.3-cli:
+    extends: .publish image
+    variables:
+        IMAGE_NAME: php
+        IMAGE_TAG: 8.3-cli-pimcore
+    needs:
+        - build pimcore php-8.3-cli amd
+        - build pimcore php-8.3-cli arm

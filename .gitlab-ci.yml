@@ -4,9 +4,7 @@ default:
   interruptible: true
 
 services:
-  - name: docker:$DOCKER_VERSION-dind
-    entrypoint: ["env", "-u", "DOCKER_HOST"]
-    command: ["dockerd-entrypoint.sh", "--experimental"]
+  - name: docker:dind
 
 variables:
   DOCKER_HOST: tcp://docker:2375
@@ -23,12 +21,9 @@ stages:
   - publish
 
 .docker buildx:
-  image: docker:$DOCKER_VERSION
+  image: docker
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - mkdir -p ~/.docker/cli-plugins/
-    - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-amd64
-    - chmod a+x ~/.docker/cli-plugins/docker-buildx
 
 .build image base:
   image: registry.gitlab.com/basecom-public/docker/image/docker:$BUILD_IMAGE_TAG
@@ -86,3 +81,5 @@ include:
   - local: /gitlab-ci/pimcore-php-8.1-fpm.yaml
   - local: /gitlab-ci/pimcore-php-8.2-cli.yaml
   - local: /gitlab-ci/pimcore-php-8.2-fpm.yaml
+  - local: /gitlab-ci/pimcore-php-8.3-cli.yaml
+  - local: /gitlab-ci/pimcore-php-8.3-fpm.yaml

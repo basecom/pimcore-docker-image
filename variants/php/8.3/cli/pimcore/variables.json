@@ -1,0 +1,9 @@
+{
+  "general": {
+    "distribution": "bullseye"
+  },
+  "php": {
+    "version": "8.3",
+    "variant": "cli"
+  }
+}

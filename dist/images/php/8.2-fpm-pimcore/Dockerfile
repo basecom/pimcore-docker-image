@@ -18,6 +18,7 @@ RUN apt-get update \
  && apt-get update \
  && apt-get install -y --no-install-recommends \
     bash \
+    bash-completion \
     chromium \
     chromium-sandbox \
     default-mysql-client \

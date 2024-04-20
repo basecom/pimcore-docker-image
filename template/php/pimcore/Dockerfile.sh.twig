@@ -67,11 +67,11 @@ RUN apt-get update \
     zlib1g-dev \
 	{% if php.variant == 'cli' %}
     git \
-	jq \
-	less \
-	nano \
-	rsync \
-	supervisor \
+    jq \
+    less \
+    nano \
+    rsync \
+    supervisor \
 	{% endif %}
  && apt-get autoremove -y \
  && apt-get clean \

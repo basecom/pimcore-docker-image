@@ -77,11 +77,11 @@ RUN apt-get update \
     wget \
     zlib1g-dev \
 	    git \
-	jq \
-	less \
-	nano \
-	rsync \
-	supervisor \
+    jq \
+    less \
+    nano \
+    rsync \
+    supervisor \
 	 && apt-get autoremove -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \

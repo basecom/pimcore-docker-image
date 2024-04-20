@@ -13,7 +13,9 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # install system extensions
 RUN apt-get update \
- && apt-get install -y lsb-release \
+ && apt-get install -y lsb-release wget gnupg \
+ && wget -qO - 'https://proget.makedeb.org/debian-feeds/prebuilt-mpr.pub' | gpg --dearmor | tee /usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg 1> /dev/null \
+ && echo "deb [arch=all,$(dpkg --print-architecture) signed-by=/usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg] https://proget.makedeb.org prebuilt-mpr $(lsb_release -cs)" | tee /etc/apt/sources.list.d/prebuilt-mpr.list \
  && echo "deb http://deb.debian.org/debian $(lsb_release -sc)-backports main" > /etc/apt/sources.list.d/backports.list \
  && apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -29,6 +31,7 @@ RUN apt-get update \
     graphviz \
     html2text \
     jpegoptim \
+    just \
     libbz2-dev \
     libc-client-dev \
     libdjvulibre-dev \
@@ -74,7 +77,6 @@ RUN apt-get update \
     unzip \
     vim \
     webp \
-    wget \
     zlib1g-dev \
 	    git \
     jq \
@@ -83,6 +85,7 @@ RUN apt-get update \
     rsync \
     supervisor \
 	 && apt-get autoremove -y \
+ && apt-get remove -y gnupg \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
  && ln -s /usr/bin/chromium /usr/bin/chromium-browser

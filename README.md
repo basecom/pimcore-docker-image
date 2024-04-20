@@ -18,6 +18,7 @@ multiple docker files
 
 - 8.1
 - 8.2
+- 8.3
 
 ## Provided Tags
 

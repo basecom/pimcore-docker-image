@@ -5,7 +5,7 @@ LABEL org.opencontainers.image.authors="DevOps Team <devops@basecom.de>"
 LABEL org.opencontainers.image.vendor="basecom GmbH & Co. KG"
 
 # install composer from composer image
-COPY --from=composer:2.5.2 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
 # set timezone
 ENV TZ=Europe/Berlin

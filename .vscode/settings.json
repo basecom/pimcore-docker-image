@@ -1,5 +1,6 @@
 {
     "conventionalCommits.scopes": [
-        "pimcore"
+        "pimcore",
+        "php"
     ]
 }

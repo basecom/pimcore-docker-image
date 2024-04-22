@@ -96,7 +96,10 @@ RUN apt-get update \
     g++ \
  && docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp \
  && docker-php-ext-install intl mbstring mysqli bcmath gd bz2 soap xsl pdo pdo_mysql fileinfo exif ftp zip opcache ldap sockets \
- && pecl install redis apcu xdebug imagick/imagick@master pcov amqp excimer \
+ && pecl install redis apcu xdebug pcov amqp excimer \
+ && mkdir -p /usr/src/php/ext/imagick \
+ && curl -fsSL https://github.com/Imagick/imagick/archive/28f27044e435a2b203e32675e942eb8de620ee58.tar.gz | tar xvz -C /usr/src/php/ext/imagick --strip 1 \
+ && docker-php-ext-install imagick \
  && docker-php-ext-enable redis imagick apcu xdebug pcov amqp excimer ftp \
  && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
  && docker-php-ext-install imap \

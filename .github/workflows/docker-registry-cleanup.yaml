@@ -36,11 +36,12 @@ jobs:
 
             - name: Fetch multi-platform package version SHAs
               id: multi-arch-digests
+              working-directory: /tmp/build-metadata/image-tags
               run: |
                   digests=""
                   imageNames=""
-                  for identifier in /tmp/build-metadata/image-tags/*; do
-                      imageNameAndTag="$(cat /tmp/build-metadata/image-tags/${identifier})"
+                  for identifier in *; do
+                      imageNameAndTag="$(cat ${identifier})"
                       imageName=$(echo $imageNameAndTag | cut -d: -f1)
                       imageUrl="${{ inputs.image_registry }}/${{ github.repository_owner }}/${imageNameAndTag}"
                       imageDigests=$(docker manifest inspect ${imageUrl} | jq -r '.manifests[] | .digest' | paste -s -d ' ' -)

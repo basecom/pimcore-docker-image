@@ -7,17 +7,13 @@ on:
                 type: string
                 description: 'Image registry'
                 required: true
-            image_url_path:
-                type: string
-                description: 'Image registry'
-                required: true
             image_identifier:
                 type: string
                 description: 'Image identifier'
                 required: true
             image_name:
                 type: string
-                description: 'Image name'
+                description: 'Fully qualified image name without registry and organization, e.g. pimcore-docker-image/php'
                 required: true
             image_tag:
                 type: string
@@ -29,7 +25,7 @@ on:
                 required: true
 
 env:
-    REGISTRY_IMAGE: ${{ inputs.image_registry }}/${{ inputs.image_url_path }}/${{ inputs.image_name }}
+    REGISTRY_IMAGE: ${{ inputs.image_registry }}/${{ github.repository_owner }}/${{ inputs.image_name }}
 
 jobs:
     build-and-push-php:
@@ -87,8 +83,8 @@ jobs:
                   digest="${{ steps.build.outputs.digest }}"
                   touch "/tmp/build-metadata/digests/${digest#sha256:}"
 
-                  mkdir -p /tmp/build-metadata/image-tags/${{ inputs.image_name }}
-                  touch /tmp/build-metadata/image-tags/${{ inputs.image_name }}/${{ inputs.image_tag }}
+                  mkdir -p /tmp/build-metadata/image-tags
+                  echo "${{ inputs.image_name }}/${{ inputs.image_tag }}" > "/tmp/build-metadata/image-tags/${{ inputs.image_identifier }}"
 
             - name: Upload build metadata
               uses: actions/upload-artifact@v4

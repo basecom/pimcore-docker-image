@@ -29,8 +29,7 @@ jobs:
         with:
             image_identifier: 'php-${{ matrix.php_image }}-${{ matrix.php_version }}'
             image_registry: ghcr.io
-            image_url_path: basecom/pimcore-docker-image
-            image_name: php
+            image_name: pimcore-docker-image/php
             image_tag: ${{ matrix.php_version }}-${{ matrix.php_image }}-pimcore
             image_directory: dist/images/php/${{ matrix.php_version }}-${{ matrix.php_image }}-pimcore
 
@@ -41,4 +40,3 @@ jobs:
         uses: ./.github/workflows/docker-registry-cleanup.yaml
         with:
             image_registry: ghcr.io
-            image_url_path: basecom/pimcore-docker-image

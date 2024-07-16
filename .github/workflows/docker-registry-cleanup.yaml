@@ -7,15 +7,9 @@ on:
                 type: string
                 description: 'Image registry'
                 required: true
-            image_url_path:
-                type: string
-                description: 'Image registry'
-                required: true
 
 env:
     REGISTRY: ghcr.io
-    # Hardcode for now to get it in lowercase format.
-    REGISTRY_IMAGE: ghcr.io/basecom/pimcore-docker-image/php
 
 jobs:
     cleanup:
@@ -45,14 +39,16 @@ jobs:
               run: |
                   digests=""
                   imageNames=""
-                  for imageName in /tmp/build-metadata/image-tags/*; do
-                      for imageTag in /tmp/build-metadata/image-tags/"${imageName}"/*; do
-                        imageUrl="${{ inputs.image_registry }}/${{ inputs.image_url_path }}/${imageName}:${imageTag}"
-                        imageDigests=$(docker manifest inspect ${imageUrl} | jq -r '.manifests[] | .digest' | paste -s -d ' ' -)
-                        imageNames="$images $imageName"
-                        digests="$digests $imageDigests"
-                      done
+                  for identifier in /tmp/build-metadata/image-tags/*; do
+                      imageNameAndTag="$(cat /tmp/build-metadata/image-tags/${identifier})"
+                      imageName=$(echo $imageNameAndTag | cut -d: -f1)
+                      imageUrl="${{ inputs.image_registry }}/${{ github.repository_owner }}/${imageNameAndTag}"
+                      imageDigests=$(docker manifest inspect ${imageUrl} | jq -r '.manifests[] | .digest' | paste -s -d ' ' -)
+                      
+                      imageNames="$images $imageName"
+                      digests="$digests $imageDigests"
                   done
+
                   echo "multi-arch-digests=$digests" >> $GITHUB_OUTPUT
                   echo "image-names=$imageNames" >> $GITHUB_OUTPUT
 

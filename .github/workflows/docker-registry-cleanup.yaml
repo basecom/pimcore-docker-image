@@ -48,12 +48,11 @@ jobs:
                   for imageName in /tmp/build-metadata/image-tags/*; do
                       for imageTag in /tmp/build-metadata/image-tags/"${imageName}"/*; do
                         imageUrl="${{ inputs.image_registry }}/${{ inputs.image_url_path }}/${imageName}:${imageTag}"
-                        imageDigests=$(docker manifest inspect ${imageUrl} | jq -r '.manifests.[] | .digest' | paste -s -d ' ' -)
+                        imageDigests=$(docker manifest inspect ${imageUrl} | jq -r '.manifests[] | .digest' | paste -s -d ' ' -)
                         imageNames="$images $imageName"
                         digests="$digests $imageDigests"
                       done
                   done
-                  digests=$(docker manifest inspect ${{ env.REGISTRY_IMAGE }} | jq -r '.manifests[] | .digest' | paste -s -d ' ' -)
                   echo "multi-arch-digests=$digests" >> $GITHUB_OUTPUT
                   echo "image-names=$imageNames" >> $GITHUB_OUTPUT
 

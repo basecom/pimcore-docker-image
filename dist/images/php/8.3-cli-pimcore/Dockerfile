@@ -136,6 +136,11 @@ RUN curl -fsSLO "https://github.com/imagemin/pngout-bin/raw/main/vendor/linux/x6
  && chmod 0755 pngout \
  && mv pngout /usr/local/bin/pngout
 
+# install supercronic
+COPY php/install_supercronic.sh /opt/
+
+RUN bash /opt/install_supercronic.sh
+
 # configure xDebug
 RUN echo "xdebug.idekey = PHPSTORM" >> /usr/local/etc/php/conf.d/20-xdebug.ini; \
     echo "xdebug.mode = off" >> /usr/local/etc/php/conf.d/20-xdebug.ini; \

@@ -14,7 +14,8 @@ on:
 
 env:
     REGISTRY: ghcr.io
-    REGISTRY_IMAGE: ghcr.io/${{ github.repository }}/php
+    # Hardcode for now to get it in lowercase format.
+    REGISTRY_IMAGE: ghcr.io/basecom/pimcore-docker-image/php
 
 jobs:
     build-and-push-php:

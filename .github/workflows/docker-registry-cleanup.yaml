@@ -53,7 +53,7 @@ jobs:
                         digests="$digests $imageDigests"
                       done
                   done
-                  digests=$(docker manifest inspect ${{ env.REGISTRY_IMAGE }} | jq -r '.manifests.[] | .digest' | paste -s -d ' ' -)
+                  digests=$(docker manifest inspect ${{ env.REGISTRY_IMAGE }} | jq -r '.manifests[] | .digest' | paste -s -d ' ' -)
                   echo "multi-arch-digests=$digests" >> $GITHUB_OUTPUT
                   echo "image-names=$imageNames" >> $GITHUB_OUTPUT
 

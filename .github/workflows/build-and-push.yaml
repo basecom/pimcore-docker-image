@@ -4,6 +4,7 @@ on:
     push:
         branches:
             - main
+            - gh-build
     # Rebuild every other day
     schedule:
         - cron: '0 0 */2 * *'
@@ -11,9 +12,6 @@ on:
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
-
-env:
-    REGISTRY: ghcr.io
 
 jobs:
     build-and-push-php:
@@ -29,5 +27,16 @@ jobs:
                     - fpm
         uses: ./.github/workflows/build-and-push-image.yaml
         with:
-            php_version: ${{ matrix.php_version }}
-            php_image: ${{ matrix.php_image }}
+            image_identifier: "php-${{ matrix.php_image }}-${{ matrix.php_version }}"
+            image_registry: ghcr.io
+            image_url_path: basecom/pimcore-docker-image
+            image_name: php
+            image_tag: ${{ matrix.php_version }}-${{ matrix.php_image }}-pimcore
+            image_directory: dist/images/php/${{ matrix.php_version }}-${{ matrix.php_image }}-pimcore
+
+    clean:
+        name: Cleanup registry
+        uses: ./.github/workflows/docker-registry-cleanup.yaml
+        with:
+            image_registry: ghcr.io
+            image_url_path: basecom/pimcore-docker-image

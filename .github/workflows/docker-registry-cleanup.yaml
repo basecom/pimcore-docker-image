@@ -2,10 +2,15 @@ name: 'Cleanup Docker registry'
 
 on:
     workflow_call:
-    workflow_dispatch:
-    push:
-        branches:
-            - gh-build
+        inputs:
+            image_registry:
+                type: string
+                description: 'Image registry'
+                required: true
+            image_url_path:
+                type: string
+                description: 'Image registry'
+                required: true
 
 env:
     REGISTRY: ghcr.io
@@ -21,6 +26,13 @@ jobs:
             packages: write
             id-token: write
         steps:
+            - name: Download digests
+              uses: actions/download-artifact@v4
+              with:
+                  path: /tmp/build-metadata
+                  pattern: build-metadata-*
+                  merge-multiple: true
+
             - name: Log into registry ${{ env.REGISTRY }}
               uses: docker/login-action@v3
               with:
@@ -31,14 +43,25 @@ jobs:
             - name: Fetch multi-platform package version SHAs
               id: multi-arch-digests
               run: |
+                  digests=""
+                  imageNames=""
+                  for imageName in /tmp/build-metadata/image-tags/*; do
+                      for imageTag in /tmp/build-metadata/image-tags/"${imageName}"/*; do
+                        imageUrl="${{ inputs.image_registry }}/${{ inputs.image_url_path }}/${imageName}:${imageTag}"
+                        imageDigests=$(docker manifest inspect ${imageUrl} | jq -r '.manifests.[] | .digest' | paste -s -d ' ' -)
+                        imageNames="$images $imageName"
+                        digests="$digests $imageDigests"
+                      done
+                  done
                   digests=$(docker manifest inspect ${{ env.REGISTRY_IMAGE }} | jq -r '.manifests.[] | .digest' | paste -s -d ' ' -)
                   echo "multi-arch-digests=$digests" >> $GITHUB_OUTPUT
+                  echo "image-names=$imageNames" >> $GITHUB_OUTPUT
 
             - uses: snok/container-retention-policy@v3.0.0
               with:
                   account: basecom
                   token: ${{ secrets.GITHUB_TOKEN }}
-                  image-names: php
+                  image-names: ${{ steps.multi-arch-digests.outputs.image-names }}
                   cut-off: 0s
                   tag-selection: untagged
                   dry-run: true

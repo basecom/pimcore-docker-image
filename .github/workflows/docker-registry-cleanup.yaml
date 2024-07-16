@@ -38,27 +38,21 @@ jobs:
               id: multi-arch-digests
               working-directory: /tmp/build-metadata/image-tags
               run: |
-                  digests=""
                   imageNames=""
                   for identifier in *; do
                       imageNameAndTag="$(cat ${identifier})"
                       imageName=$(echo $imageNameAndTag | cut -d: -f1)
-                      imageUrl="${{ inputs.image_registry }}/${{ github.repository_owner }}/${imageNameAndTag}"
-                      imageDigests=$(docker manifest inspect ${imageUrl} | jq -r '.manifests[] | .digest' | paste -s -d ' ' -)
                       
                       imageNames="$imageNames $imageName"
-                      digests="$digests $imageDigests"
                   done
 
-                  echo "multi-arch-digests=$digests" >> $GITHUB_OUTPUT
-                  echo "image-names=$imageNames" >> $GITHUB_OUTPUT
+                  unqiueImageNames=$(echo $imageNames | tr ' ' '\n' | sort -u | tr '\n' ' ')
+                  echo "image-names=$unqiueImageNames" >> $GITHUB_OUTPUT
 
             - uses: snok/container-retention-policy@v3.0.0
               with:
                   account: basecom
                   token: ${{ secrets.GITHUB_TOKEN }}
                   image-names: ${{ steps.multi-arch-digests.outputs.image-names }}
-                  cut-off: 0s
-                  tag-selection: untagged
+                  cut-off: 2h
                   dry-run: false
-                  skip-shas: ${{ steps.multi-arch-digests.outputs.multi-arch-digests }}

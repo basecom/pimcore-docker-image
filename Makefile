@@ -8,3 +8,9 @@ build-images:
 
 build-images-debug:
 	php orca.phar --directory=. --debug
+
+lint:
+	prettier --check .github
+
+lint-fix:
+	prettier --write .github

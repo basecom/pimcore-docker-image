@@ -36,6 +36,8 @@ jobs:
 
     clean:
         name: Cleanup registry
+        needs: 
+            - build-and-push-php
         uses: ./.github/workflows/docker-registry-cleanup.yaml
         with:
             image_registry: ghcr.io

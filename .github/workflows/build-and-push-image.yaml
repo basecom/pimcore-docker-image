@@ -116,7 +116,7 @@ jobs:
               uses: docker/metadata-action@v5
               with:
                   images: ${{ env.REGISTRY_IMAGE }}
-                  tags: ${{ matrix.php_version }}-${{ matrix.php_image }}-pimcore
+                  tags: ${{ inputs.php_version }}-${{ inputs.php_image }}-pimcore
 
             - name: Create manifest list and push
               working-directory: /tmp/digests

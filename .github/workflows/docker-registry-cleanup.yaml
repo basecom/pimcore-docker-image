@@ -60,5 +60,5 @@ jobs:
                   image-names: ${{ steps.multi-arch-digests.outputs.image-names }}
                   cut-off: 0s
                   tag-selection: untagged
-                  dry-run: true
+                  dry-run: false
                   skip-shas: ${{ steps.multi-arch-digests.outputs.multi-arch-digests }}

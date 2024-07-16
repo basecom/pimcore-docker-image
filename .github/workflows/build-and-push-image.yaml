@@ -84,7 +84,7 @@ jobs:
                   touch "/tmp/build-metadata/digests/${digest#sha256:}"
 
                   mkdir -p /tmp/build-metadata/image-tags
-                  echo "${{ inputs.image_name }}/${{ inputs.image_tag }}" > "/tmp/build-metadata/image-tags/${{ inputs.image_identifier }}"
+                  echo "${{ inputs.image_name }}:${{ inputs.image_tag }}" > "/tmp/build-metadata/image-tags/${{ inputs.image_identifier }}"
 
             - name: Upload build metadata
               uses: actions/upload-artifact@v4

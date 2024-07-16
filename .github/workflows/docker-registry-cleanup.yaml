@@ -46,7 +46,7 @@ jobs:
                       imageUrl="${{ inputs.image_registry }}/${{ github.repository_owner }}/${imageNameAndTag}"
                       imageDigests=$(docker manifest inspect ${imageUrl} | jq -r '.manifests[] | .digest' | paste -s -d ' ' -)
                       
-                      imageNames="$images $imageName"
+                      imageNames="$imageNames $imageName"
                       digests="$digests $imageDigests"
                   done
 

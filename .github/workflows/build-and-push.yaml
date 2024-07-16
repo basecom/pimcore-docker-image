@@ -4,7 +4,6 @@ on:
     push:
         branches:
             - main
-            - gh-build
     # Rebuild every other day
     schedule:
         - cron: '0 0 */2 * *'

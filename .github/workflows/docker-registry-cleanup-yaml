@@ -3,6 +3,9 @@ name: 'Cleanup Docker registry'
 on:
     workflow_call:
     workflow_dispatch:
+    push:
+        branches:
+            - gh-build
 
 env:
     REGISTRY: ghcr.io

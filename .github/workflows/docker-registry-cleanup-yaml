@@ -1,0 +1,44 @@
+name: 'Cleanup Docker registry'
+
+on:
+    workflow_call:
+    workflow_dispatch:
+
+env:
+    REGISTRY: ghcr.io
+    # Hardcode for now to get it in lowercase format.
+    REGISTRY_IMAGE: ghcr.io/basecom/pimcore-docker-image/php
+
+jobs:    
+    cleanup:
+        name: Cleanup regisitry
+        needs:
+            - merge
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+            id-token: write
+        steps:
+            - name: Log into registry ${{ env.REGISTRY }}
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Fetch multi-platform package version SHAs
+              id: multi-arch-digests
+              run: |
+                  digests=$(docker manifest inspect ${{ env.REGISTRY_IMAGE }} | jq -r '.manifests.[] | .digest' | paste -s -d ' ' -)
+                  echo "multi-arch-digests=$digests" >> $GITHUB_OUTPUT
+
+            - uses: snok/container-retention-policy
+              with:
+                  account: basecom
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  image-names: php
+                  cut-off: 0s
+                  tag-selection: untagged
+                  dry-run: true
+                  skip-shas: ${{ steps.multi-arch-digests.outputs.multi-arch-digests }}

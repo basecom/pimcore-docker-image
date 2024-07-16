@@ -27,7 +27,7 @@ jobs:
                     - fpm
         uses: ./.github/workflows/build-and-push-image.yaml
         with:
-            image_identifier: "php-${{ matrix.php_image }}-${{ matrix.php_version }}"
+            image_identifier: 'php-${{ matrix.php_image }}-${{ matrix.php_version }}'
             image_registry: ghcr.io
             image_url_path: basecom/pimcore-docker-image
             image_name: php
@@ -36,7 +36,7 @@ jobs:
 
     clean:
         name: Cleanup registry
-        needs: 
+        needs:
             - build-and-push-php
         uses: ./.github/workflows/docker-registry-cleanup.yaml
         with:

@@ -17,7 +17,7 @@ env:
     # Hardcode for now to get it in lowercase format.
     REGISTRY_IMAGE: ghcr.io/basecom/pimcore-docker-image/php
 
-jobs:    
+jobs:
     cleanup:
         name: Cleanup regisitry
         runs-on: ubuntu-latest

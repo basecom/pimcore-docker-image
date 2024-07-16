@@ -63,8 +63,8 @@ jobs:
                   platforms: ${{ matrix.architecture.platform }}
                   labels: ${{ steps.meta.outputs.labels }}
                   outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
-                  cache-from: type=gha,scope=${{inputs.php_image}}-${{ inputs.php_version }}-${{ matrix.architecture.identifier }}
-                  cache-to: type=gha,mode=max,scope=${{inputs.php_image}}-${{ inputs.php_version }}-${{ matrix.architecture.identifier }}
+                  cache-from: type=gha,scope=php-${{inputs.php_image}}-${{ inputs.php_version }}-${{ matrix.architecture.identifier }}
+                  cache-to: type=gha,mode=max,scope=php-${{inputs.php_image}}-${{ inputs.php_version }}-${{ matrix.architecture.identifier }}
                   github-token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Export digest

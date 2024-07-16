@@ -1,0 +1,33 @@
+name: 'Build and push images'
+
+on:
+    push:
+        branches:
+            - main
+    # Rebuild every other day
+    schedule:
+        - cron: '0 0 */2 * *'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    REGISTRY: ghcr.io
+
+jobs:
+    build-and-push-php:
+        name: Build and push PHP
+        strategy:
+            matrix:
+                php_version:
+                    - 8.1
+                    - 8.2
+                    - 8.3
+                php_image:
+                    - cli
+                    - fpm
+        uses: ./.github/workflows/build-and-push-image.yaml
+        with:
+            php_version: ${{ matrix.php_version }}
+            php_image: ${{ matrix.php_image }}

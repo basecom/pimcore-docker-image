@@ -1,0 +1,138 @@
+name: 'Build and push image'
+
+on:
+    workflow_call:
+        inputs:
+            php_image:
+                type: string
+                description: 'PHP image type'
+                required: true
+            php_version:
+                type: string
+                description: 'PHP version'
+                required: true
+
+env:
+    REGISTRY: ghcr.io
+    REGISTRY_IMAGE: ghcr.io/${{ github.repository }}/php
+
+jobs:
+    build-and-push-php:
+        name: Build and push PHP
+        runs-on: ${{ matrix.architecture.runs-on }}
+        permissions:
+            contents: read
+            packages: write
+            id-token: write
+        strategy:
+            matrix:
+                architecture:
+                    - runs-on: ubuntu-latest
+                      platform: linux/amd64
+                    - runs-on: bscm-github-actions-runner-set-arm
+                      platform: linux/arm64
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Prepare
+              run: |
+                  platform=${{ matrix.architecture.platform }}
+                  echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Log into registry ${{ env.REGISTRY }}
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Extract Docker metadata
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: ${{ env.REGISTRY_IMAGE }}
+                  tags: ${{ inputs.php_version }}-${{ inputs.php_image }}-pimcore
+
+            - name: Build and push by digest
+              id: build
+              uses: docker/build-push-action@v6
+              with:
+                  context: dist/images/php/${{ steps.meta.outputs.version }}
+                  platforms: ${{ matrix.architecture.platform }}
+                  labels: ${{ steps.meta.outputs.labels }}
+                  output: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+
+            - name: Export digest
+              run: |
+                  mkdir -p /tmp/digests
+                  digest="${{ steps.build.outputs.digest }}"
+                  touch "/tmp/digests/${digest#sha256:}"
+
+            - name: Upload digest
+              uses: actions/upload-artifact@v4
+              with:
+                  name: digests-${{ env.PLATFORM_PAIR }}
+                  path: /tmp/digests/*
+                  if-no-files-found: error
+                  retention-days: 1
+
+    merge:
+        name: Merge architecture images
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+            id-token: write
+        steps:
+            - name: Install cosign
+              uses: sigstore/cosign-installer@v3.5.0
+
+            - name: Download digests
+              uses: actions/download-artifact@v4
+              with:
+                  path: /tmp/digests
+                  pattern: digests-*
+                  merge-multiple: true
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Log into registry ${{ env.REGISTRY }}
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Extract Docker metadata
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: ${{ env.REGISTRY_IMAGE }}
+                  tags: ${{ matrix.php_version }}-${{ matrix.php_image }}-pimcore
+
+            - name: Create manifest list and push
+              working-directory: /tmp/digests
+              run: |
+                  docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+                      $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+
+            - name: Inspect image
+              run: |
+                  docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
+
+                  manifestJson=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }} --format "{{json .Manifest}}")
+                  digest=$(jq -r '.digest' <<< "$manifestJson")
+                  echo "DIGEST=$digest" >> $GITHUB_ENV
+
+            - name: Sign the published Docker image
+              env:
+                  TAGS: ${{ steps.meta.outputs.tags }}
+              shell: bash
+              run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}

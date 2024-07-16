@@ -84,6 +84,8 @@ jobs:
 
     merge:
         name: Merge architecture images
+        needs:
+            - build-and-push-php
         runs-on: ubuntu-latest
         permissions:
             contents: read

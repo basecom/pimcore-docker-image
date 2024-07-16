@@ -15,8 +15,6 @@ env:
 jobs:    
     cleanup:
         name: Cleanup regisitry
-        needs:
-            - merge
         runs-on: ubuntu-latest
         permissions:
             contents: read

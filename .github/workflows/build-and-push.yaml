@@ -35,7 +35,6 @@ jobs:
             image_directory: dist/images/php/${{ matrix.php_version }}-${{ matrix.php_image }}-pimcore
             image_push: ${{ github.ref_name == github.event.repository.default_branch }}
 
-
     clean:
         name: Cleanup registry
         needs:
@@ -43,4 +42,4 @@ jobs:
         uses: ./.github/workflows/docker-registry-cleanup.yaml
         with:
             image_registry: ghcr.io
-        if: github.ref_name == github.event.repository.default_branch
+            dry_run: ${{ github.ref_name == github.event.repository.default_branch }}

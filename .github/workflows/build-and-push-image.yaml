@@ -23,6 +23,11 @@ on:
                 type: string
                 description: 'Image directory'
                 required: true
+            image_push:
+                type: boolean
+                description: 'Push image to registry'
+                required: false
+                default: false
 
 env:
     REGISTRY_IMAGE: ${{ inputs.image_registry }}/${{ github.repository_owner }}/${{ inputs.image_name }}
@@ -72,7 +77,7 @@ jobs:
                   context: ${{ inputs.image_directory }}
                   platforms: ${{ matrix.architecture.platform }}
                   labels: ${{ steps.meta.outputs.labels }}
-                  outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+                  outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=${{ inputs.image_push }}
                   cache-from: type=gha,scope=${{ inputs.image_identifier }}-${{ matrix.architecture.identifier }}
                   cache-to: type=gha,mode=max,scope=${{ inputs.image_identifier }}-${{ matrix.architecture.identifier }}
                   github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -136,6 +141,7 @@ jobs:
               run: |
                   docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
                       $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+              if: ${{ inputs.image_push }}
 
             - name: Inspect image
               run: |
@@ -144,9 +150,11 @@ jobs:
                   manifestJson=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }} --format "{{json .Manifest}}")
                   digest=$(jq -r '.digest' <<< "$manifestJson")
                   echo "DIGEST=$digest" >> $GITHUB_ENV
+              if: ${{ inputs.image_push }}
 
             - name: Sign the published Docker image
               env:
                   TAGS: ${{ steps.meta.outputs.tags }}
               shell: bash
               run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+              if: ${{ inputs.image_push }}

@@ -1,10 +1,10 @@
 name: 'Build and push images'
 
 on:
+    pull_request:
     push:
         branches:
             - main
-            - gh-build
     # Rebuild every other day
     schedule:
         - cron: '0 0 */2 * *'
@@ -33,6 +33,8 @@ jobs:
             image_name: pimcore-docker-image/php
             image_tag: ${{ matrix.php_version }}-${{ matrix.php_image }}-pimcore
             image_directory: dist/images/php/${{ matrix.php_version }}-${{ matrix.php_image }}-pimcore
+            image_push: ${{ github.ref_name == github.event.repository.default_branch }}
+
 
     clean:
         name: Cleanup registry
@@ -41,3 +43,4 @@ jobs:
         uses: ./.github/workflows/docker-registry-cleanup.yaml
         with:
             image_registry: ghcr.io
+        if: github.ref_name == github.event.repository.default_branch

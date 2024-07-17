@@ -60,4 +60,4 @@ jobs:
                   token: ${{ secrets.GITHUB_TOKEN }}
                   image-names: ${{ steps.multi-arch-digests.outputs.image-names }}
                   cut-off: 2h
-                  dry-run: ${{ github.event.inputs.dry_run }}
+                  dry-run: ${{ inputs.dry_run }}

@@ -21,6 +21,7 @@ jobs:
             contents: read
             packages: write
             id-token: write
+            attestations: write
         strategy:
             matrix:
                 php_version:
@@ -45,7 +46,6 @@ jobs:
             contents: read
             packages: write
             id-token: write
-            attestations: write
         needs:
             - build-and-push-php
         uses: ./.github/workflows/docker-registry-cleanup.yaml

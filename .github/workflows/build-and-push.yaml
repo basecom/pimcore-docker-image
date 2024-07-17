@@ -42,4 +42,4 @@ jobs:
         uses: ./.github/workflows/docker-registry-cleanup.yaml
         with:
             image_registry: ghcr.io
-            dry_run: ${{ github.ref_name == github.event.repository.default_branch }}
+            dry_run: ${{ github.ref_name != github.event.repository.default_branch }}

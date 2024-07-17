@@ -36,10 +36,6 @@ jobs:
     build-and-push-php:
         name: Build and push PHP
         runs-on: ${{ matrix.architecture.runs-on }}
-        permissions:
-            contents: read
-            packages: write
-            id-token: write
         strategy:
             matrix:
                 architecture:
@@ -104,14 +100,7 @@ jobs:
         needs:
             - build-and-push-php
         runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            packages: write
-            id-token: write
         steps:
-            - name: Install cosign
-              uses: sigstore/cosign-installer@v3.5.0
-
             - name: Download digests
               uses: actions/download-artifact@v4
               with:
@@ -144,17 +133,22 @@ jobs:
               if: ${{ inputs.image_push }}
 
             - name: Inspect image
+              id: inspect
               run: |
                   docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
 
                   manifestJson=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }} --format "{{json .Manifest}}")
                   digest=$(jq -r '.digest' <<< "$manifestJson")
-                  echo "DIGEST=$digest" >> $GITHUB_ENV
+                  echo "digest=$digest" >> "$GITHUB_OUTPUT"
               if: ${{ inputs.image_push }}
 
-            - name: Sign the published Docker image
-              env:
-                  TAGS: ${{ steps.meta.outputs.tags }}
-              shell: bash
-              run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+            - name: Attest
+              uses: actions/attest-build-provenance@v1
+              id: attest
+              with:
+                subject-name: ${{ steps.meta.outputs.tags }}
+                subject-digest: ${{ steps.inspect.outputs.digest }}
+                push-to-registry: true
+                github-token: ${{ secrets.GITHUB_TOKEN }}
               if: ${{ inputs.image_push }}
+    

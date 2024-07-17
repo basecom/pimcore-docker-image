@@ -36,10 +36,6 @@ jobs:
     build-and-push-php:
         name: Build and push PHP
         runs-on: ${{ matrix.architecture.runs-on }}
-        permissions:
-            contents: read
-            packages: write
-            id-token: write
         strategy:
             matrix:
                 architecture:
@@ -104,10 +100,6 @@ jobs:
         needs:
             - build-and-push-php
         runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            packages: write
-            id-token: write
         steps:
             - name: Install cosign
               uses: sigstore/cosign-installer@v3.5.0

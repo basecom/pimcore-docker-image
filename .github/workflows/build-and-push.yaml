@@ -17,6 +17,10 @@ concurrency:
 jobs:
     build-and-push-php:
         name: Build and push PHP
+        permissions:
+            contents: read
+            packages: write
+            id-token: write
         strategy:
             matrix:
                 php_version:
@@ -37,6 +41,10 @@ jobs:
 
     clean:
         name: Cleanup registry
+        permissions:
+            contents: read
+            packages: write
+            id-token: write
         needs:
             - build-and-push-php
         uses: ./.github/workflows/docker-registry-cleanup.yaml

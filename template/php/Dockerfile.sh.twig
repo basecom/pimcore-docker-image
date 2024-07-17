@@ -23,6 +23,13 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 {% block additionalPackages %}
 {% endblock %}
 
+{% if php.variant == 'cli' %}
+# install supercronic
+COPY php/install_supercronic.sh /opt/
+
+RUN bash /opt/install_supercronic.sh
+{% endif %}
+
 # configure xDebug
 RUN echo "xdebug.idekey = PHPSTORM" >> /usr/local/etc/php/conf.d/20-xdebug.ini; \
     echo "xdebug.mode = off" >> /usr/local/etc/php/conf.d/20-xdebug.ini; \

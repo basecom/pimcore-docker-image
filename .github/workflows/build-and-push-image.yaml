@@ -1,0 +1,160 @@
+name: 'Build and push image'
+
+on:
+    workflow_call:
+        inputs:
+            image_registry:
+                type: string
+                description: 'Image registry'
+                required: true
+            image_identifier:
+                type: string
+                description: 'Image identifier'
+                required: true
+            image_name:
+                type: string
+                description: 'Fully qualified image name without registry and organization, e.g. pimcore-docker-image/php'
+                required: true
+            image_tag:
+                type: string
+                description: 'Image tag'
+                required: true
+            image_directory:
+                type: string
+                description: 'Image directory'
+                required: true
+            image_push:
+                type: boolean
+                description: 'Push image to registry'
+                required: false
+                default: false
+
+env:
+    REGISTRY_IMAGE: ${{ inputs.image_registry }}/${{ github.repository_owner }}/${{ inputs.image_name }}
+
+jobs:
+    build-and-push-php:
+        name: Build and push PHP
+        runs-on: ${{ matrix.architecture.runs-on }}
+        permissions:
+            contents: read
+            packages: write
+            id-token: write
+        strategy:
+            matrix:
+                architecture:
+                    - runs-on: ubuntu-latest
+                      platform: linux/amd64
+                      identifier: linux-amd64
+                    - runs-on: bscm-github-actions-runner-set-arm
+                      platform: linux/arm64
+                      identifier: linux-arm64
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Log into registry ${{ inputs.image_registry }}
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ inputs.image_registry }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Extract Docker metadata
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: ${{ env.REGISTRY_IMAGE }}
+                  tags: ${{ inputs.image_tag }}
+
+            - name: Build and push by digest
+              id: build
+              uses: docker/build-push-action@v6
+              with:
+                  context: ${{ inputs.image_directory }}
+                  platforms: ${{ matrix.architecture.platform }}
+                  labels: ${{ steps.meta.outputs.labels }}
+                  outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=${{ inputs.image_push }}
+                  cache-from: type=gha,scope=${{ inputs.image_identifier }}-${{ matrix.architecture.identifier }}
+                  cache-to: type=gha,mode=max,scope=${{ inputs.image_identifier }}-${{ matrix.architecture.identifier }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Export digest and tag
+              run: |
+                  mkdir -p /tmp/build-metadata//digests
+                  digest="${{ steps.build.outputs.digest }}"
+                  touch "/tmp/build-metadata/digests/${digest#sha256:}"
+
+                  mkdir -p /tmp/build-metadata/image-tags
+                  echo "${{ inputs.image_name }}:${{ inputs.image_tag }}" > "/tmp/build-metadata/image-tags/${{ inputs.image_identifier }}"
+
+            - name: Upload build metadata
+              uses: actions/upload-artifact@v4
+              with:
+                  name: build-metadata-${{ inputs.image_identifier }}-${{ matrix.architecture.identifier }}
+                  path: /tmp/build-metadata/*
+                  if-no-files-found: error
+                  retention-days: 1
+
+    merge:
+        name: Merge architecture images
+        needs:
+            - build-and-push-php
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+            id-token: write
+        steps:
+            - name: Install cosign
+              uses: sigstore/cosign-installer@v3.5.0
+
+            - name: Download digests
+              uses: actions/download-artifact@v4
+              with:
+                  path: /tmp/build-metadata
+                  pattern: build-metadata-${{ inputs.image_identifier }}-*
+                  merge-multiple: true
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Log into registry ${{ inputs.image_registry }}
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ inputs.image_registry }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Extract Docker metadata
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: ${{ env.REGISTRY_IMAGE }}
+                  tags: ${{ inputs.image_tag }}
+
+            - name: Create manifest list and push
+              working-directory: /tmp/build-metadata/digests
+              run: |
+                  docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+                      $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+              if: ${{ inputs.image_push }}
+
+            - name: Inspect image
+              run: |
+                  docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
+
+                  manifestJson=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }} --format "{{json .Manifest}}")
+                  digest=$(jq -r '.digest' <<< "$manifestJson")
+                  echo "DIGEST=$digest" >> $GITHUB_ENV
+              if: ${{ inputs.image_push }}
+
+            - name: Sign the published Docker image
+              env:
+                  TAGS: ${{ steps.meta.outputs.tags }}
+              shell: bash
+              run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+              if: ${{ inputs.image_push }}

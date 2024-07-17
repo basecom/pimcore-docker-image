@@ -1,0 +1,45 @@
+name: 'Build and push images'
+
+on:
+    pull_request:
+    push:
+        branches:
+            - main
+    # Rebuild every other day
+    schedule:
+        - cron: '0 0 */2 * *'
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    build-and-push-php:
+        name: Build and push PHP
+        strategy:
+            matrix:
+                php_version:
+                    - 8.1
+                    - 8.2
+                    - 8.3
+                php_image:
+                    - cli
+                    - fpm
+        uses: ./.github/workflows/build-and-push-image.yaml
+        with:
+            image_identifier: 'php-${{ matrix.php_image }}-${{ matrix.php_version }}'
+            image_registry: ghcr.io
+            image_name: pimcore-docker-image/php
+            image_tag: ${{ matrix.php_version }}-${{ matrix.php_image }}-pimcore
+            image_directory: dist/images/php/${{ matrix.php_version }}-${{ matrix.php_image }}-pimcore
+            image_push: ${{ github.ref_name == github.event.repository.default_branch }}
+
+    clean:
+        name: Cleanup registry
+        needs:
+            - build-and-push-php
+        uses: ./.github/workflows/docker-registry-cleanup.yaml
+        with:
+            image_registry: ghcr.io
+            dry_run: ${{ github.ref_name != github.event.repository.default_branch }}

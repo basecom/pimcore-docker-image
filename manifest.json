@@ -9,5 +9,6 @@
       "php/8.3/fpm/pimcore:8.3-fpm-pimcore"
     ],
     "docker": ["docker/stable:stable", "docker/test:test"]
-  }
+  },
+  "shared_assets": "./template/assets"
 }

@@ -17,3 +17,11 @@ build-images:
 # Build images with debug enabled
 build-images-debug:
 	php orca.phar --directory=. --debug
+
+# Lint code
+lint:
+	prettier --check .github
+
+# Fix codestyle
+lint-fix:
+	prettier --write .github

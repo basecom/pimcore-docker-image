@@ -101,7 +101,7 @@ RUN apt-get update \
     build-essential \
     g++ \
  && docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp \
- && docker-php-ext-install intl mysqli bcmath gd bz2 soap xsl pdo pdo_mysql fileinfo exif zip opcache ldap sockets \
+ && docker-php-ext-install intl mysqli bcmath gd bz2 soap xsl pdo_mysql fileinfo exif zip opcache ldap sockets \
  && pecl install redis apcu xdebug pcov amqp excimer \
  && mkdir -p /usr/src/php/ext/imagick \
  && curl -fsSL https://github.com/Imagick/imagick/archive/28f27044e435a2b203e32675e942eb8de620ee58.tar.gz | tar xvz -C /usr/src/php/ext/imagick --strip 1 \
@@ -117,6 +117,7 @@ RUN apt-get update \
 RUN if ! php -m | grep -q 'ftp'; then docker-php-ext-install ftp && docker-php-ext-enable ftp; fi
 RUN if ! php -m | grep -q 'imagick'; then docker-php-ext-install imagick && docker-php-ext-enable imagick; fi
 RUN if ! php -m | grep -q 'mbstring'; then docker-php-ext-install mbstring; fi
+RUN if ! php -m | grep -q 'pdo'; then docker-php-ext-install pdo; fi
 
 # install additional packages
 # cjpeg

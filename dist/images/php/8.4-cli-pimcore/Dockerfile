@@ -107,7 +107,6 @@ RUN apt-get update \
  && curl -fsSL https://github.com/Imagick/imagick/archive/28f27044e435a2b203e32675e942eb8de620ee58.tar.gz | tar xvz -C /usr/src/php/ext/imagick --strip 1 \
  && docker-php-ext-install imagick \
  && docker-php-ext-enable redis imagick apcu xdebug pcov amqp excimer \
- && if ! php -m | grep -q 'ftp'; then docker-php-ext-install ftp && docker-php-ext-enable ftp; fi \
  && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
  && docker-php-ext-install imap \
  && docker-php-ext-enable imap \
@@ -115,6 +114,8 @@ RUN apt-get update \
  && apt-get remove -y autoconf automake libtool pkg-config libz-dev build-essential g++ \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+
+RUN if ! php -m | grep -q 'ftp'; then docker-php-ext-install ftp && docker-php-ext-enable ftp; fi
 
 # install additional packages
 # cjpeg

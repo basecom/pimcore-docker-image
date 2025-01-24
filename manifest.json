@@ -8,7 +8,9 @@
       "php/8.2/cli/pimcore:8.2-cli-pimcore",
       "php/8.2/fpm/pimcore:8.2-fpm-pimcore",
       "php/8.3/cli/pimcore:8.3-cli-pimcore",
-      "php/8.3/fpm/pimcore:8.3-fpm-pimcore"
+      "php/8.3/fpm/pimcore:8.3-fpm-pimcore",
+      "php/8.4/cli/pimcore:8.4-cli-pimcore",
+      "php/8.4/fpm/pimcore:8.4-fpm-pimcore"
     ],
     "docker": ["docker/stable:stable", "docker/test:test"]
   },

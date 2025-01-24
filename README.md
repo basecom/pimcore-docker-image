@@ -20,7 +20,17 @@ multiple docker files
 - 8.1
 - 8.2
 - 8.3
+- 8.4
 
 ## Provided Tags
 
 - PHPVERSION-IMAGETYPE-bullseye-SYSTEM
+
+## Create and build new images
+
+* Create your desired version in `variants/php/8.x` and copy the `cli` and `fpm` from another version
+* Adjust the `variables.json` files to your needs
+* Add the new version to the `manifest.json` file
+* Run `just install-orca` to install orca
+* Run `just build-images` to build your images with orca
+  * For that you need `php` installed locally

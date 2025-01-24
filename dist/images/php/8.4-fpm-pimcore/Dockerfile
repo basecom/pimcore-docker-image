@@ -94,8 +94,6 @@ RUN apt-get update \
     libz-dev \
     build-essential \
     g++ \
- && docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp \
- && docker-php-ext-install  gd soap opcache ldap sockets \
  && pecl install redis apcu xdebug pcov amqp excimer \
  && mkdir -p /usr/src/php/ext/imagick \
  && curl -fsSL https://github.com/Imagick/imagick/archive/28f27044e435a2b203e32675e942eb8de620ee58.tar.gz | tar xvz -C /usr/src/php/ext/imagick --strip 1 \
@@ -121,6 +119,11 @@ RUN if ! php -i | grep -q 'intl'; then docker-php-ext-install intl; fi
 RUN if ! php -i | grep -q 'mysqli'; then docker-php-ext-install mysqli; fi
 RUN if ! php -i | grep -q 'bcmath'; then docker-php-ext-install bcmath; fi
 RUN if ! php -i | grep -q 'bz2'; then docker-php-ext-install bz2; fi
+RUN if ! php -i | grep -q 'soap'; then docker-php-ext-install soap; fi
+RUN if ! php -i | grep -q 'opcache'; then docker-php-ext-install opcache; fi
+RUN if ! php -i | grep -q 'ldap'; then docker-php-ext-install ldap; fi
+RUN if ! php -i | grep -q 'sockets'; then docker-php-ext-install sockets; fi
+RUN if ! php -i | grep -q 'gd'; then docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp && docker-php-ext-install gd; fi
 
 # install additional packages
 # cjpeg

@@ -85,6 +85,8 @@ RUN apt-get update \
  && ln -s /usr/bin/chromium /usr/bin/chromium-browser
 
 # install php extensions
+RUN php -i
+
 RUN apt-get update \
  && apt-get install -y \
     autoconf \

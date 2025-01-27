@@ -1,6 +1,8 @@
 {% extends 'template/php/pimcore/Dockerfile.sh.twig' %}
 
 {% block phpExtensions %}
+RUN php -i
+
 RUN apt-get update \
  && apt-get install -y \
     autoconf \

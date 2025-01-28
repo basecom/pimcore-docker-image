@@ -103,11 +103,7 @@ RUN apt-get update \
  && pecl install redis apcu xdebug pcov amqp excimer \
  && mkdir -p /usr/src/php/ext/imagick \
  && curl -fsSL https://github.com/Imagick/imagick/archive/28f27044e435a2b203e32675e942eb8de620ee58.tar.gz | tar xvz -C /usr/src/php/ext/imagick --strip 1 \
- && docker-php-ext-enable redis apcu xdebug pcov amqp excimer \
- && apt-get autoremove -y \
- && apt-get remove -y autoconf automake libtool pkg-config libz-dev build-essential g++ \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+ && docker-php-ext-enable redis apcu xdebug pcov amqp excimer
 
 RUN if ! php -i | grep -q 'ftp'; then docker-php-ext-install ftp && docker-php-ext-enable ftp; fi
 RUN if ! php -i | grep -q 'imagick'; then docker-php-ext-install imagick && docker-php-ext-enable imagick; fi
@@ -127,6 +123,11 @@ RUN if ! php -i | grep -q 'opcache'; then docker-php-ext-install opcache; fi
 RUN if ! php -i | grep -q 'ldap'; then docker-php-ext-install ldap; fi
 RUN if ! php -i | grep -q 'sockets'; then docker-php-ext-install sockets; fi
 RUN if ! php -i | grep -q 'gd'; then docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp && docker-php-ext-install gd; fi
+
+RUN apt-get autoremove -y \
+ && apt-get remove -y autoconf automake libtool pkg-config libz-dev build-essential g++ \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 # install additional packages
 # cjpeg

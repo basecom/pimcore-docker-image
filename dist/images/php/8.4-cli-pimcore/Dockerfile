@@ -5,7 +5,7 @@ LABEL org.opencontainers.image.authors="DevOps Team <devops@basecom.de>"
 LABEL org.opencontainers.image.vendor="basecom GmbH & Co. KG"
 
 # install composer from composer image
-COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
 
 # set timezone
 ENV TZ=Europe/Berlin
@@ -100,17 +100,31 @@ RUN apt-get update \
     libz-dev \
     build-essential \
     g++ \
- && docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp \
- && docker-php-ext-install intl mbstring mysqli bcmath gd bz2 soap xsl pdo pdo_mysql fileinfo exif ftp zip opcache ldap sockets \
  && pecl install redis apcu xdebug pcov amqp excimer \
  && mkdir -p /usr/src/php/ext/imagick \
  && curl -fsSL https://github.com/Imagick/imagick/archive/28f27044e435a2b203e32675e942eb8de620ee58.tar.gz | tar xvz -C /usr/src/php/ext/imagick --strip 1 \
- && docker-php-ext-install imagick \
- && docker-php-ext-enable redis imagick apcu xdebug pcov amqp excimer ftp \
- && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
- && docker-php-ext-install imap \
- && docker-php-ext-enable imap \
- && apt-get autoremove -y \
+ && docker-php-ext-enable redis apcu xdebug pcov amqp excimer
+
+RUN if ! php -i | grep -q 'ftp'; then docker-php-ext-install ftp && docker-php-ext-enable ftp; fi
+RUN if ! php -i | grep -q 'imagick'; then docker-php-ext-install imagick && docker-php-ext-enable imagick; fi
+RUN if ! php -i | grep -q 'mbstring'; then docker-php-ext-install mbstring; fi
+RUN if ! php -i | grep -q 'pdo'; then docker-php-ext-install pdo; fi
+RUN if ! php -i | grep -q 'pdo_mysql'; then docker-php-ext-install pdo_mysql; fi
+RUN if ! php -i | grep -q 'fileinfo'; then docker-php-ext-install fileinfo; fi
+RUN if ! php -i | grep -q 'exif'; then docker-php-ext-install exif; fi
+RUN if ! php -i | grep -q 'xsl'; then docker-php-ext-install xsl; fi
+RUN if ! php -i | grep -q 'zip'; then docker-php-ext-install zip; fi
+RUN if ! php -i | grep -q 'intl'; then docker-php-ext-install intl; fi
+RUN if ! php -i | grep -q 'mysqli'; then docker-php-ext-install mysqli; fi
+RUN if ! php -i | grep -q 'bcmath'; then docker-php-ext-install bcmath; fi
+RUN if ! php -i | grep -q 'bz2'; then docker-php-ext-install bz2; fi
+RUN if ! php -i | grep -q 'soap'; then docker-php-ext-install soap; fi
+RUN if ! php -i | grep -q 'opcache'; then docker-php-ext-install opcache; fi
+RUN if ! php -i | grep -q 'ldap'; then docker-php-ext-install ldap; fi
+RUN if ! php -i | grep -q 'sockets'; then docker-php-ext-install sockets; fi
+RUN if ! php -i | grep -q 'gd'; then docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp && docker-php-ext-install gd; fi
+
+RUN apt-get autoremove -y \
  && apt-get remove -y autoconf automake libtool pkg-config libz-dev build-essential g++ \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*

@@ -91,8 +91,6 @@ RUN apt-get update \
  && ln -s /usr/bin/chromium /usr/bin/chromium-browser
 
 # install php extensions
-RUN php -i
-
 RUN apt-get update \
  && apt-get install -y \
     autoconf \
@@ -106,9 +104,6 @@ RUN apt-get update \
  && mkdir -p /usr/src/php/ext/imagick \
  && curl -fsSL https://github.com/Imagick/imagick/archive/28f27044e435a2b203e32675e942eb8de620ee58.tar.gz | tar xvz -C /usr/src/php/ext/imagick --strip 1 \
  && docker-php-ext-enable redis apcu xdebug pcov amqp excimer \
- && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
- && docker-php-ext-install imap \
- && docker-php-ext-enable imap \
  && apt-get autoremove -y \
  && apt-get remove -y autoconf automake libtool pkg-config libz-dev build-essential g++ \
  && apt-get clean \
